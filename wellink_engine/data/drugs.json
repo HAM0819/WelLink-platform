@@ -1,0 +1,92 @@
+{
+  "version": "2026.11-seed",
+  "review_required": true,
+  "notes": "약 성분(일반명)과 대표 제품명을 약효군으로 묶은 시드 데이터입니다. 사용자가 입력한 약 이름에 별칭이 포함되면 해당 약효군으로 인식합니다. 인식하지 못한 약은 '확인 필요'로 안내합니다. 식약처 의약품 제품 허가 정보와 대조해 검수·확장하세요. usual_slot은 섭취 시간표 계산용(morning: 아침 공복 복용이 일반적인 약)입니다.",
+  "classes": [
+    {"id": "anticoagulant_vka", "name": "항응고제(와파린)",
+     "members": [{"name": "와파린", "aliases": ["와파린", "warfarin", "쿠마딘", "coumadin"]}]},
+    {"id": "anticoagulant_doac", "name": "항응고제(NOAC)",
+     "members": [
+       {"name": "아픽사반", "aliases": ["아픽사반", "apixaban", "엘리퀴스", "eliquis"]},
+       {"name": "리바록사반", "aliases": ["리바록사반", "rivaroxaban", "자렐토", "xarelto"]},
+       {"name": "에독사반", "aliases": ["에독사반", "edoxaban", "릭시아나", "lixiana"]},
+       {"name": "다비가트란", "aliases": ["다비가트란", "dabigatran", "프라닥사", "pradaxa"]}
+     ]},
+    {"id": "antiplatelet", "name": "항혈소판제",
+     "members": [
+       {"name": "아스피린", "aliases": ["아스피린", "aspirin", "아세틸살리실산", "acetylsalicylic acid"]},
+       {"name": "클로피도그렐", "aliases": ["클로피도그렐", "clopidogrel", "플라빅스", "plavix"]},
+       {"name": "티카그렐러", "aliases": ["티카그렐러", "ticagrelor", "브릴린타", "brilinta"]},
+       {"name": "실로스타졸", "aliases": ["실로스타졸", "cilostazol", "프레탈", "pletaal"]}
+     ]},
+    {"id": "thyroid_hormone", "name": "갑상선호르몬제", "usual_slot": "morning",
+     "members": [{"name": "레보티록신", "aliases": ["레보티록신", "levothyroxine", "씬지로이드", "신지로이드", "synthroid", "씬지록신", "갑상선호르몬"]}]},
+    {"id": "bisphosphonate", "name": "골다공증 치료제(비스포스포네이트)", "usual_slot": "morning",
+     "members": [
+       {"name": "알렌드로네이트", "aliases": ["알렌드로네이트", "알렌드론산", "alendronate", "포사맥스", "fosamax"]},
+       {"name": "리세드로네이트", "aliases": ["리세드로네이트", "risedronate", "악토넬", "actonel"]},
+       {"name": "이반드로네이트", "aliases": ["이반드로네이트", "ibandronate", "본비바", "bonviva"]}
+     ]},
+    {"id": "tetracycline", "name": "테트라사이클린계 항생제",
+     "members": [
+       {"name": "독시사이클린", "aliases": ["독시사이클린", "doxycycline"]},
+       {"name": "미노사이클린", "aliases": ["미노사이클린", "minocycline"]},
+       {"name": "테트라사이클린", "aliases": ["테트라사이클린", "tetracycline"]}
+     ]},
+    {"id": "quinolone", "name": "퀴놀론계 항생제",
+     "members": [
+       {"name": "시프로플록사신", "aliases": ["시프로플록사신", "ciprofloxacin", "씨프로"]},
+       {"name": "레보플록사신", "aliases": ["레보플록사신", "levofloxacin", "크라비트", "cravit"]},
+       {"name": "목시플록사신", "aliases": ["목시플록사신", "moxifloxacin", "아벨록스", "avelox"]}
+     ]},
+    {"id": "antibiotic_general", "name": "항생제",
+     "members": [
+       {"name": "아목시실린", "aliases": ["아목시실린", "amoxicillin", "오구멘틴", "augmentin"]},
+       {"name": "세팔렉신", "aliases": ["세팔렉신", "cephalexin", "세파클러", "cefaclor"]},
+       {"name": "아지트로마이신", "aliases": ["아지트로마이신", "azithromycin", "지스로맥스"]},
+       {"name": "클래리스로마이신", "aliases": ["클래리스로마이신", "clarithromycin", "클래리시드"]},
+       {"name": "항생제", "aliases": ["항생제", "antibiotic"]}
+     ]},
+    {"id": "statin", "name": "고지혈증 치료제(스타틴)",
+     "members": [
+       {"name": "아토르바스타틴", "aliases": ["아토르바스타틴", "atorvastatin", "리피토", "lipitor"]},
+       {"name": "로수바스타틴", "aliases": ["로수바스타틴", "rosuvastatin", "크레스토", "crestor"]},
+       {"name": "심바스타틴", "aliases": ["심바스타틴", "simvastatin"]},
+       {"name": "프라바스타틴", "aliases": ["프라바스타틴", "pravastatin"]},
+       {"name": "피타바스타틴", "aliases": ["피타바스타틴", "pitavastatin", "리바로", "livalo"]},
+       {"name": "로바스타틴", "aliases": ["로바스타틴", "lovastatin"]},
+       {"name": "스타틴", "aliases": ["스타틴", "statin"]}
+     ]},
+    {"id": "metformin", "name": "당뇨병 치료제(메트포르민)",
+     "members": [{"name": "메트포르민", "aliases": ["메트포르민", "metformin", "다이아벡스", "글루코파지", "glucophage"]}]},
+    {"id": "antidiabetic_hypoglycemic", "name": "당뇨병 치료제(인슐린·설포닐우레아 등)",
+     "members": [
+       {"name": "인슐린", "aliases": ["인슐린", "insulin"]},
+       {"name": "글리메피리드", "aliases": ["글리메피리드", "glimepiride", "아마릴", "amaryl"]},
+       {"name": "글리클라지드", "aliases": ["글리클라지드", "gliclazide", "디아미크롱"]},
+       {"name": "글리피지드", "aliases": ["글리피지드", "glipizide"]},
+       {"name": "당뇨약", "aliases": ["당뇨약", "당뇨병약", "혈당강하제"]}
+     ]},
+    {"id": "ppi", "name": "위산분비억제제(PPI)",
+     "members": [
+       {"name": "오메프라졸", "aliases": ["오메프라졸", "omeprazole"]},
+       {"name": "에스오메프라졸", "aliases": ["에스오메프라졸", "esomeprazole", "넥시움", "nexium"]},
+       {"name": "란소프라졸", "aliases": ["란소프라졸", "lansoprazole", "란스톤"]},
+       {"name": "판토프라졸", "aliases": ["판토프라졸", "pantoprazole"]},
+       {"name": "라베프라졸", "aliases": ["라베프라졸", "rabeprazole", "파리에트"]},
+       {"name": "에소메졸", "aliases": ["에소메졸"]}
+     ]},
+    {"id": "thiazide", "name": "이뇨제(티아지드계)",
+     "members": [
+       {"name": "히드로클로로티아지드", "aliases": ["히드로클로로티아지드", "하이드로클로로티아자이드", "hydrochlorothiazide", "hctz"]},
+       {"name": "인다파미드", "aliases": ["인다파미드", "indapamide"]},
+       {"name": "클로르탈리돈", "aliases": ["클로르탈리돈", "chlorthalidone"]}
+     ]},
+    {"id": "immunosuppressant", "name": "면역억제제",
+     "members": [
+       {"name": "사이클로스포린", "aliases": ["사이클로스포린", "시클로스포린", "cyclosporine", "ciclosporin"]},
+       {"name": "타크로리무스", "aliases": ["타크로리무스", "tacrolimus", "프로그랍"]},
+       {"name": "미코페놀레이트", "aliases": ["미코페놀레이트", "mycophenolate", "셀셉트"]}
+     ]}
+  ]
+}

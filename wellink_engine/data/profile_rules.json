@@ -1,0 +1,33 @@
+{
+  "version": "2026.11-seed",
+  "review_required": true,
+  "notes": "가족력·생애주기 규칙. 가족력은 질병 위험을 판단하는 근거가 아니라, 관련 기능성을 '추가로 고려'하고 부족하지 않은지 점검하는 데만 씁니다. related_goals 값은 사용자가 직접 고른 목적보다 낮은 가중치로 반영됩니다.",
+  "family_history": [
+    {"id": "osteoporosis", "name": "골다공증", "related_goals": {"bone": 0.6}, "priority_nutrients": ["calcium", "vitamin_d"],
+     "note": "뼈 건강 관련 영양소(칼슘·비타민D)가 부족하지 않은지 함께 확인해요."},
+    {"id": "cardiovascular", "name": "심혈관 질환(심근경색·뇌졸중 등)", "related_goals": {"cardio": 0.6},
+     "note": "혈행·혈중 지질 관련 기능성을 함께 고려했어요."},
+    {"id": "dyslipidemia", "name": "이상지질혈증(고지혈증)", "related_goals": {"cardio": 0.6},
+     "note": "혈중 지질 관련 기능성을 함께 고려했어요."},
+    {"id": "hypertension", "name": "고혈압", "related_goals": {"cardio": 0.4},
+     "note": "혈압·혈행 관련 기능성을 함께 고려했어요."},
+    {"id": "diabetes", "name": "당뇨병", "related_goals": {"blood_sugar": 0.5},
+     "note": "식후 혈당 관련 기능성을 함께 고려했어요."},
+    {"id": "eye_disease", "name": "황반변성 등 눈 질환", "related_goals": {"eye": 0.6},
+     "note": "눈 건강 관련 기능성을 함께 고려했어요."},
+    {"id": "liver_disease", "name": "간 질환", "related_goals": {"liver": 0.4},
+     "note": "여러 원료를 한꺼번에 시작하기보다 하나씩 늘리고, 이상이 느껴지면 섭취를 멈추고 상담하세요."},
+    {"id": "cancer", "name": "암", "related_goals": {},
+     "note": "건강기능식품은 질병의 예방·치료를 위한 것이 아니에요. 정기 검진을 함께 챙기세요."},
+    {"id": "thyroid", "name": "갑상선 질환", "related_goals": {},
+     "note": "요오드 등 갑상선 관련 영양소를 고용량으로 드시기 전에는 전문가와 상담하세요."}
+  ],
+  "life_stage": [
+    {"id": "female_19_49", "when": {"sex": "female", "age_min": 19, "age_max": 49}, "priority_nutrients": ["iron"],
+     "note": "19~49세 여성은 철 권장섭취량(14mg)이 남성보다 높아요."},
+    {"id": "female_50plus", "when": {"sex": "female", "age_min": 50}, "priority_nutrients": ["calcium", "vitamin_d"],
+     "note": "50세 이상 여성은 칼슘 권장섭취량(800mg)이 높아져요."},
+    {"id": "age_65plus", "when": {"age_min": 65}, "priority_nutrients": ["vitamin_d", "vitamin_b12"],
+     "note": "65세 이상은 비타민D 충분섭취량이 15μg으로 높아지고, 비타민B12 흡수가 줄 수 있어요."}
+  ]
+}

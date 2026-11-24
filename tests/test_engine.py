@@ -267,11 +267,41 @@ def recommend(**kw):
 def test_recommendation_student_fatigue_immunity():
     """대학생 B 장면: 피로·면역 목적, 복용 약 없음."""
     r = recommend(age=22, sex="female", goals=["fatigue", "immunity"])
-    names = [p.product_id for p in r.recommended]
-    assert "wl_redginseng" in names
+    assert r.recommended and len(r.recommended) <= 2  # 두 목적을 적은 제품으로 채움
     assert all(p.reasons for p in r.recommended)
     assert r.report.summary.overall in ("ok", "review")
     assert all(g.covered for g in r.report.goal_coverage)
+
+
+def test_lean_combination_when_goal_already_covered():
+    """핵심 기능성이 채워진 목적의 보조 기능성만을 위해 제품을 더 넣지 않는다."""
+    r = recommend(age=40, sex="female", goals=["body_fat", "fatigue"])
+    assert [p.product_id for p in r.recommended] == ["wl_garcinia", "wl_redginseng"]
+
+
+def test_inflammation_goal_uses_only_approved_claims():
+    r = recommend(age=45, sex="female", goals=["inflammation_care"])
+    texts = " ".join(x.text for p in r.recommended for x in p.reasons)
+    assert "염증" not in texts
+    assert "유해산소" in texts or "관절" in texts
+
+
+def test_label_units_and_twice_daily_are_normalized():
+    """표시 단위(IU·g·CFU)와 1회 기준·1일 2회 표시를 1일 기준으로 환산하고 과정을 남긴다."""
+    r = check([
+        ItemInput(name="직구 비타민D", amount_basis="per_serving", servings_per_day=2,
+                  ingredients=[IngredientAmountInput(name="Vitamin D3", amount=2500, unit="IU")]),
+        ItemInput(product_id="wl_calmagd", actual_servings_per_day=1),  # 표시는 1일 2회
+    ], goals=["bone"])
+    dist = {d.ingredient_id: d for d in r.report.distribution}
+    assert dist["vitamin_d"].total == pytest.approx(130)   # 125 + 5
+    assert dist["vitamin_d"].total_iu == pytest.approx(5200)
+    assert dist["calcium"].total == pytest.approx(300)
+    calcs = [s.calculation for s in dist["vitamin_d"].sources]
+    assert "1회 2,500IU × 1일 2회 = 125μg" in calcs[0]
+    assert "실제 1일 1회 섭취" in calcs[1]
+    views = {i.name: i for i in r.report.items}
+    assert views["WL 칼슘·마그네슘·비타민D"].actual_servings_per_day == 1
 
 
 def test_recommendation_never_creates_warning_or_drug_issue():

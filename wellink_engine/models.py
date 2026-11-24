@@ -97,21 +97,29 @@ class Profile(BaseModel):
 
 class IngredientAmountInput(BaseModel):
     name: str = Field(..., description="성분명 (한글/영문/별칭 모두 가능)")
-    amount: float = Field(..., gt=0)
-    unit: str = Field(..., description="mg, μg(mcg), g, IU, 억CFU, CFU 등")
+    amount: float = Field(..., gt=0, description="제품 표시사항의 함량 (amount_basis 기준)")
+    unit: str = Field(..., description="표시 단위 그대로: mg, μg(mcg), g, IU, 억CFU, CFU 등")
 
 
 class ItemInput(BaseModel):
     """조합에 들어가는 제품 1개.
 
     - 플랫폼 취급 제품·DB 등록 제품: product_id만 지정
-    - DB에 없는 타사 제품: name + ingredients 지정 (제품 표시사항의 1일 섭취량 기준)
+    - DB에 없는 타사 제품: name + ingredients를 표시사항 그대로 입력
+      (단위·1회 기준/1일 기준·1일 섭취 횟수가 제품마다 달라도 엔진이 1일 기준으로 환산)
+
+    실제 섭취량이 표시와 다르면 actual_servings_per_day(하루 실제 섭취 횟수) 또는 servings(배수)로 지정한다.
     """
 
     product_id: Optional[str] = None
     name: Optional[str] = None
     ingredients: Optional[list[IngredientAmountInput]] = None
-    servings: float = Field(1.0, gt=0, le=10, description="표시된 1일 섭취량 대비 배수 (1 = 표시대로)")
+    amount_basis: Literal["per_day", "per_serving"] = Field(
+        "per_day", description="직접 입력 제품의 함량 기준: per_day(1일 섭취량당) / per_serving(1회 섭취량당)")
+    servings_per_day: float = Field(1.0, gt=0, le=10, description="직접 입력 제품의 표시된 1일 섭취 횟수")
+    actual_servings_per_day: Optional[float] = Field(
+        None, gt=0, le=20, description="사용자가 실제로 하루에 먹는 횟수 (지정하면 servings 대신 사용)")
+    servings: float = Field(1.0, gt=0, le=10, description="표시된 1일 섭취량 대비 실제 섭취 배수 (1 = 표시대로)")
     locked: bool = Field(False, description="사용자가 고정한 제품 (수정안에서 빼거나 바꾸지 않음)")
 
 
@@ -142,7 +150,8 @@ class ProductContribution(BaseModel):
     item_key: str
     product_id: str
     product_name: str
-    amount: float
+    amount: float = Field(..., description="실제 하루 섭취량 (성분 기준 단위)")
+    calculation: str = Field(..., description="표시값에서 하루 섭취량으로 환산한 과정")
 
 
 class ReferenceValues(BaseModel):
@@ -161,7 +170,8 @@ class DistributionEntry(BaseModel):
     name: str
     category: Literal["nutrient", "functional"]
     unit: str
-    total: float
+    total: float = Field(..., description="하루 합계 (성분 기준 단위, 모든 제품 공통)")
+    total_iu: Optional[float] = Field(None, description="IU 표기가 흔한 성분(비타민A·D·E)의 IU 환산값")
     reference: ReferenceValues
     percent_of_reference: Optional[float] = Field(None, description="권장(충분)섭취량 또는 기능성 최소량 대비 %")
     percent_of_upper: Optional[float] = Field(None, description="상한섭취량 또는 기능성 최대량 대비 %")
@@ -216,7 +226,9 @@ class ItemView(BaseModel):
     name: str
     brand: Optional[str] = None
     source: Literal["platform", "external"]
-    servings: float
+    servings: float = Field(..., description="표시된 1일 섭취량 대비 실제 섭취 배수")
+    label_servings_per_day: float = Field(..., description="표시된 1일 섭취 횟수")
+    actual_servings_per_day: float = Field(..., description="실제 1일 섭취 횟수")
     locked: bool
     price_per_day: int
     daily_dose_text: Optional[str] = None

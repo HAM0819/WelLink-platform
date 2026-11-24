@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from .catalog import Catalog, Product, ProductIngredient
+from .catalog import Catalog, DoseLine, Product, ProductIngredient
 from .context import InputError
 from .models import ItemInput
-from .units import UnitError, to_canonical
+from .text import fmt_amount
 
 
 @dataclass
@@ -20,6 +20,19 @@ class ResolvedItem:
     input: ItemInput
     amounts: dict[str, float]
     unknown_ingredients: list[str] = field(default_factory=list)
+    dose_lines: dict[str, list[DoseLine]] = field(default_factory=dict)
+
+    @property
+    def actual_servings_per_day(self) -> float:
+        return round(self.product.servings_per_day * self.servings, 3)
+
+    def calculation(self, ingredient_id: str, unit_label: str) -> str:
+        """표시값 → 실제 하루 섭취량 환산 과정 (예: 1회 1,000IU × 1일 2회 = 50μg → 실제 1일 1회 섭취 = 25μg)."""
+        base = " + ".join(line.label_text for line in self.dose_lines.get(ingredient_id, []))
+        if self.servings != 1:
+            actual = fmt_amount(self.amounts.get(ingredient_id, 0.0), unit_label)
+            base += f" → 실제 1일 {self.actual_servings_per_day:g}회 섭취(표시의 {self.servings:g}배) = {actual}"
+        return base
 
     @property
     def source(self) -> str:
@@ -50,17 +63,16 @@ def resolve_items(catalog: Catalog, items: list[ItemInput]) -> list[ResolvedItem
                 if ing is None:
                     unknown.append(ia.name)
                     continue
-                try:
-                    amount = to_canonical(ia.amount, ia.unit, ing.unit, ing.iu_factor)
-                except UnitError as e:
-                    unknown.append(f"{ia.name} ({e})")
-                    continue
-                ingredients.append(ProductIngredient(id=ing.id, amount=amount))
+                ingredients.append(ProductIngredient(id=ing.id, amount=ia.amount, unit=ia.unit))
+            basis_text = "1회" if item.amount_basis == "per_serving" else "1일"
             product = Product(
                 id=f"custom-{custom_count}",
                 name=item.name,
                 brand="직접 입력",
                 sold_on_platform=False,
+                amount_basis=item.amount_basis,
+                servings_per_day=item.servings_per_day,
+                daily_dose_text=f"1일 {item.servings_per_day:g}회 (함량: {basis_text} 섭취량 기준 입력)",
                 ingredients=ingredients,
                 price_per_day=0,
             )
@@ -68,6 +80,12 @@ def resolve_items(catalog: Catalog, items: list[ItemInput]) -> list[ResolvedItem
             custom = True
         else:
             raise InputError("각 제품은 product_id 또는 name과 ingredients를 함께 보내야 해요.")
+
+        dose = catalog.normalize_dose(product)
+        unknown += [f"{e}" for e in dose.errors]
+        servings = item.servings
+        if item.actual_servings_per_day is not None:
+            servings = item.actual_servings_per_day / product.servings_per_day
 
         key = base_key
         n = 2
@@ -79,12 +97,13 @@ def resolve_items(catalog: Catalog, items: list[ItemInput]) -> list[ResolvedItem
             ResolvedItem(
                 key=key,
                 product=product,
-                servings=item.servings,
+                servings=servings,
                 locked=item.locked,
                 custom=custom,
                 input=item,
-                amounts=catalog.product_amounts(product, item.servings),
+                amounts={k: v * servings for k, v in dose.per_day.items()},
                 unknown_ingredients=unknown,
+                dose_lines=dose.lines,
             )
         )
     return resolved
@@ -100,6 +119,7 @@ def platform_item(catalog: Catalog, product_id: str, servings: float = 1.0, lock
         custom=False,
         input=ItemInput(product_id=product.id, servings=servings, locked=locked),
         amounts=catalog.product_amounts(product, servings),
+        dose_lines=catalog.normalize_dose(product).lines,
     )
 
 

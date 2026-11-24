@@ -146,9 +146,11 @@ class Reviser:
                 if i.key == action.target_key:
                     out.append(ResolvedItem(
                         key=i.key, product=i.product, servings=action.new_servings, locked=i.locked,
-                        custom=i.custom, input=i.input.model_copy(update={"servings": action.new_servings}),
-                        amounts=cat.product_amounts(i.product, action.new_servings),
+                        custom=i.custom,
+                        input=i.input.model_copy(update={"servings": action.new_servings, "actual_servings_per_day": None}),
+                        amounts={k: v / i.servings * action.new_servings for k, v in i.amounts.items()},
                         unknown_ingredients=i.unknown_ingredients,
+                        dose_lines=i.dose_lines,
                     ))
                 else:
                     out.append(i)
@@ -286,7 +288,8 @@ class Reviser:
             funcs = cat.product_functions(new_p)
             text = f"{josa(new_p.name, '을/를')} 추가해요." + (f" ({funcs[0]})" if funcs else "")
         elif action.kind == SuggestionAction.REDUCE:
-            text = f"{target.product.name} 섭취량을 하루 {action.new_servings:g}회분으로 줄여요."
+            times = target.product.servings_per_day * action.new_servings
+            text = f"{target.product.name} 섭취를 표시대로 하루 {times:g}회로 줄여요."
         else:
             text = ""
         important = [f for f in resolved if f.type != FindingType.DUPLICATE or len(resolved) == 1]

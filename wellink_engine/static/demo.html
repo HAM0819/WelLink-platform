@@ -114,6 +114,8 @@ ul.plain { margin: 0; padding-left: 16px; font-size: 13px; color: var(--muted); 
     </div>
     <label class="field">건강 관리 목적 <span class="muted">(누른 순서 = 중요한 순서, 최대 5개)</span></label>
     <div class="chips" id="goals"></div>
+    <label class="field">확장 목적 <span class="muted">(고령층 등, 추후 노출 예정)</span></label>
+    <div class="chips" id="goals-ext"></div>
     <label class="field">가족력 <span class="muted">(선택)</span></label>
     <div class="chips" id="family"></div>
     <label class="field" for="meds">복용 중인 약 <span class="muted">(쉼표로 구분, 성분명 또는 제품명)</span></label>
@@ -135,7 +137,11 @@ ul.plain { margin: 0; padding-left: 16px; font-size: 13px; color: var(--muted); 
     </div>
     <details style="margin-top:8px"><summary>목록에 없는 제품 직접 입력</summary>
       <input id="custom-name" type="text" placeholder="제품명" style="margin-top:6px">
-      <textarea id="custom-ings" placeholder="한 줄에 하나씩: 성분명 양 단위&#10;비타민D 2000 IU&#10;아연 15 mg" style="margin-top:6px"></textarea>
+      <div class="row" style="margin-top:6px">
+        <select id="custom-basis"><option value="per_serving">함량: 1회 섭취량당</option><option value="per_day">함량: 1일 섭취량당</option></select>
+        <label class="toggle" style="flex:none">1일 <input id="custom-times" type="number" min="1" max="10" value="1" style="width:56px"> 회</label>
+      </div>
+      <textarea id="custom-ings" placeholder="표시사항 그대로, 한 줄에 하나씩: 성분명 양 단위&#10;비타민D 2500 IU&#10;아연 15 mg" style="margin-top:6px"></textarea>
       <button class="small" id="custom-add" style="margin-top:6px">직접 입력 제품 추가</button>
     </details>
     <button class="primary" id="run" style="margin-top:12px">AI 추천 받고 성분 점검하기</button>
@@ -157,7 +163,7 @@ ul.plain { margin: 0; padding-left: 16px; font-size: 13px; color: var(--muted); 
 
 <script>
 const API = "";
-const state = { sex: "male", goals: ["bone", "cardio"], family: ["dyslipidemia"], current: [], items: [],
+const state = { sex: "male", goals: ["cardio", "fatigue"], family: ["dyslipidemia"], current: [], items: [],
   recommended: {}, excluded: [], notes: [], report: null, revision: null, products: [] };
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -266,16 +272,20 @@ function show(report, revision) {
     return `<div class="item"><div class="item-head"><div>
         ${isRec ? '<span class="badge b-rec">AI 추천</span>' : it.source === "external" ? '<span class="badge b-ext">현재 복용</span>' : '<span class="badge b-rec">선택</span>'}
         ${it.locked ? '<span class="badge b-lock">고정</span>' : ""}
-        <span class="item-name">${esc(it.name)}</span>${it.servings !== 1 ? ` <span class="muted">×${it.servings}</span>` : ""}
+        <span class="item-name">${esc(it.name)}</span>
         <div class="muted">${esc(it.daily_dose_text || "")}${it.price_per_day ? " · 하루 " + won(it.price_per_day) : ""}</div></div></div>
       ${isRec ? `<ul class="reasons">${rec.reasons.map((r) => `<li>${esc(r.text)}</li>`).join("")}</ul>` : ""}
       <div class="actions">
         <button class="small" data-lock="${i}">${it.locked ? "고정 해제" : "고정"}</button>
         <button class="small" data-del="${i}">빼기</button>
+        <label class="toggle muted" style="font-size:12px">실제 1일 <input type="number" data-times="${i}" min="0.5" max="20" step="0.5" value="${it.actual_servings_per_day}" style="width:52px;padding:3px 5px;font-size:12px"> 회${it.actual_servings_per_day !== it.label_servings_per_day ? ` <span class="badge b-lock">표시 ${it.label_servings_per_day}회</span>` : ""}</label>
         ${alts.length ? `<select data-alt="${i}" style="width:auto;flex:1;padding:4px 6px;font-size:12px"><option value="">다른 제품으로 바꾸기</option>${alts.map((a) =>
           `<option value="${esc(a.product_id)}">${esc(a.name)} — ${esc(a.reason)}</option>`).join("")}</select>` : ""}
       </div></div>`;
   }).join("");
+  $("combo").querySelectorAll("[data-times]").forEach((el) => el.onchange = () => {
+    const i = +el.dataset.times; const v = Number(el.value);
+    if (v > 0) { state.items[i] = { ...state.items[i], actual_servings_per_day: v, servings: 1 }; recheck(); } });
   $("combo").querySelectorAll("[data-del]").forEach((b) => b.onclick = () => { state.items.splice(+b.dataset.del, 1); recheck(); });
   $("combo").querySelectorAll("[data-lock]").forEach((b) => b.onclick = () => { const i = +b.dataset.lock; state.items[i] = { ...state.items[i], locked: !state.items[i].locked }; recheck(); });
   $("combo").querySelectorAll("[data-alt]").forEach((s) => s.onchange = () => { if (s.value) { state.items[+s.dataset.alt] = { product_id: s.value }; recheck(); } });
@@ -320,8 +330,10 @@ function show(report, revision) {
       right = `${d.status_label} · ${ref.label} 대비 ${Math.round(d.percent_of_reference)}%`;
     } else { width = 0; right = d.status_label; }
     const total = d.total >= 100 ? Math.round(d.total).toLocaleString("ko-KR") : +d.total.toFixed(2);
-    return `<div class="dist"><div class="dist-top"><span>${esc(d.name)} <b>${total}${esc(d.unit)}</b>${d.is_duplicate ? ' <span class="badge b-ext">중복</span>' : ""}</span><span>${esc(right)}</span></div>
-      <div class="bar st-${d.status}"><i style="width:${width}%"></i>${mark !== null ? `<span class="mark" style="left:${mark}%"></span>` : ""}</div></div>`;
+    const iu = d.total_iu ? ` <span class="muted">(${Math.round(d.total_iu).toLocaleString("ko-KR")}IU)</span>` : "";
+    return `<div class="dist"><div class="dist-top"><span>${esc(d.name)} <b>${total}${esc(d.unit)}</b>${iu}${d.is_duplicate ? ' <span class="badge b-ext">중복</span>' : ""}</span><span>${esc(right)}</span></div>
+      <div class="bar st-${d.status}"><i style="width:${width}%"></i>${mark !== null ? `<span class="mark" style="left:${mark}%"></span>` : ""}</div>
+      <details><summary>제품별 하루 섭취량 환산</summary><ul>${d.sources.map((s) => `<li>${esc(s.product_name)}: ${esc(s.calculation)}</li>`).join("")}</ul></details></div>`;
   }).join("");
 
   // 시간표
@@ -338,9 +350,11 @@ function show(report, revision) {
 }
 
 async function init() {
-  const [goals, family, products] = await Promise.all([api("/v1/catalog/goals"), api("/v1/catalog/family-history"), api("/v1/catalog/products")]);
+  const [goals, goalsExt, family, products] = await Promise.all([api("/v1/catalog/goals?tier=core"),
+    api("/v1/catalog/goals?tier=extended"), api("/v1/catalog/family-history"), api("/v1/catalog/products")]);
   state.products = products;
-  const draw = () => { chipGroup($("goals"), goals, state.goals, true, draw); chipGroup($("family"), family, state.family, false, draw); };
+  const draw = () => { chipGroup($("goals"), goals, state.goals, true, draw); chipGroup($("goals-ext"), goalsExt, state.goals, true, draw);
+    chipGroup($("family"), family, state.family, false, draw); };
   draw();
   $("sex").querySelectorAll(".chip").forEach((b) => b.onclick = () => {
     state.sex = b.dataset.v; $("sex").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", x === b)); });
@@ -354,7 +368,8 @@ async function init() {
   $("custom-add").onclick = () => {
     try {
       const name = $("custom-name").value.trim(); if (!name) throw new Error("제품명을 입력하세요");
-      state.current.push({ name, ingredients: parseCustom() }); renderCurrent();
+      state.current.push({ name, ingredients: parseCustom(), amount_basis: $("custom-basis").value,
+        servings_per_day: Number($("custom-times").value) || 1 }); renderCurrent();
       $("custom-name").value = ""; $("custom-ings").value = "";
     } catch (e) { alert(e.message); }
   };

@@ -115,8 +115,8 @@ def _make_finding(
 def _label_evidence(ing: Ingredient, contribs: list[tuple[ResolvedItem, float]]) -> list[Evidence]:
     out = []
     for item, value in contribs:
-        servings = f" × {item.servings:g}회분" if item.servings != 1 else ""
-        out.append(Evidence(source=LABEL_SOURCE, detail=f"{item.product.name}{servings}: {ing.name} {amt(ing, value)}"))
+        calc = item.calculation(ing.id, short_unit(ing))
+        out.append(Evidence(source=LABEL_SOURCE, detail=f"{item.product.name}: {ing.name} {calc}"))
     return out
 
 
@@ -183,6 +183,8 @@ class Checker:
             brand=item.product.brand,
             source=item.source,
             servings=item.servings,
+            label_servings_per_day=item.product.servings_per_day,
+            actual_servings_per_day=item.actual_servings_per_day,
             locked=item.locked,
             price_per_day=item.price_per_day,
             daily_dose_text=item.product.daily_dose_text,
@@ -593,7 +595,10 @@ class Checker:
         for iid, total in totals.amounts.items():
             ing = cat.ingredients[iid]
             sources = [
-                ProductContribution(item_key=it.key, product_id=it.product.id, product_name=it.product.name, amount=round(v, 4))
+                ProductContribution(
+                    item_key=it.key, product_id=it.product.id, product_name=it.product.name, amount=round(v, 4),
+                    calculation=it.calculation(iid, short_unit(ing)),
+                )
                 for it, v in totals.contributions[iid]
             ]
             pct_ref = pct_ul = None
@@ -645,6 +650,7 @@ class Checker:
                     category=ing.category,
                     unit=short_unit(ing),
                     total=round(total, 4),
+                    total_iu=round(total / ing.iu_factor, 1) if ing.iu_factor else None,
                     reference=ref,
                     percent_of_reference=round(pct_ref, 1) if pct_ref is not None else None,
                     percent_of_upper=round(pct_ul, 1) if pct_ul is not None else None,

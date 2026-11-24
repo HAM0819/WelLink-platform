@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 
 from .catalog import Catalog, Product, TagInfo
 from .checker import TIMING_TYPES, Checker, blocks_new_product
-from .context import ProfileContext
+from .context import GOAL_COVERED_STRENGTH, ProfileContext
 from .items import ResolvedItem, platform_item, with_unique_key
 from .models import (
     AlternativeProduct,
@@ -33,7 +33,8 @@ from .models import (
 MIN_GAIN = 0.45           # 이보다 효용이 작으면 추가하지 않음 (조합을 가볍게 유지)
 PRICE_PENALTY = 0.0001    # 하루 1,000원당 0.1점 감점
 CAUTION_PENALTY = 0.2
-TIMING_PENALTY = 0.05     # 시간 간격으로 해결되는 항목은 작게 감점
+TIMING_PENALTY = 0.05
+COVERED_GOAL_FACTOR = 0.4  # 목적의 핵심 기능성이 채워지면 보조 기능성의 필요도를 낮춤     # 시간 간격으로 해결되는 항목은 작게 감점
 INFO_PENALTY = 0.03
 _IGNORED_NEW = {FindingType.GOAL_GAP, FindingType.NUTRIENT_LOW}
 
@@ -72,10 +73,23 @@ class Recommender:
                 covered[tag] = max(covered.get(tag, 0.0), info.strength)
         return covered
 
+    def _effective_demand(self, covered: dict[str, float]) -> dict[str, float]:
+        """목적별 필요도. 핵심 기능성이 이미 채워진 목적은 나머지 보조 기능성의 필요도를 낮춘다."""
+        eff: dict[str, float] = {}
+        weighted = [(self.catalog.goals[g], w) for g, w in self.ctx.goal_weights.items()]
+        weighted += [(self.catalog.goals[g], w) for g, w in self.ctx.family_goal_weights.items()]
+        for goal, weight in weighted:
+            core = self.ctx.core_tags(goal)
+            done = max((covered.get(t, 0.0) for t in core), default=0.0) >= GOAL_COVERED_STRENGTH
+            for tag, tw in goal.tags.items():
+                d = weight * tw * (COVERED_GOAL_FACTOR if done and covered.get(tag, 0.0) < GOAL_COVERED_STRENGTH else 1.0)
+                eff[tag] = max(eff.get(tag, 0.0), round(d, 3))
+        return eff
+
     def _gain(self, tags: dict[str, TagInfo], covered: dict[str, float]) -> tuple[float, dict[str, float]]:
         gain = 0.0
         inc: dict[str, float] = {}
-        for tag, demand in self.ctx.demand.items():
+        for tag, demand in self._effective_demand(covered).items():
             s = tags[tag].strength if tag in tags else 0.0
             delta = s - covered.get(tag, 0.0)
             if delta > 0:

@@ -1,7 +1,7 @@
 {
   "version": "2026.11-seed",
   "review_required": true,
-  "notes": "모든 제품은 개발·시연용 가상 제품입니다. 실제 취급 제품의 표시사항(1일 섭취량당 함량·주의사항)으로 교체하세요. sold_on_platform=false인 제품은 사용자가 '현재 먹고 있는 제품'으로 등록하는 타사 제품 예시(식약처 품목 DB 연동 전 임시 데이터)입니다. ingredients의 amount는 1일 섭취량 기준이며 단위는 ingredients.json의 unit을 따릅니다. timing: morning/evening/any.",
+  "notes": "모든 제품은 개발·시연용 가상 제품입니다. 실제 취급 제품의 표시사항으로 교체하세요. sold_on_platform=false인 제품은 사용자가 '현재 먹고 있는 제품'으로 등록하는 타사 제품 예시입니다. 함량은 표시사항 그대로 넣습니다: amount_basis(per_day=1일 섭취량당, per_serving=1회 섭취량당, 기본 per_day), servings_per_day(표시된 1일 섭취 횟수, 기본 1), 성분별 unit(IU·mg·μg·g·CFU 등, 생략하면 ingredients.json의 기준 단위). 엔진이 1일 기준·성분 기준 단위로 환산합니다. timing: morning/evening/any.",
   "allergens": {
     "crustacean": {"name": "갑각류(게·새우)", "aliases": ["갑각류", "게", "새우", "crustacean", "shellfish", "크릴"]},
     "milk": {"name": "우유", "aliases": ["우유", "유제품", "milk", "dairy", "유당"]},
@@ -38,15 +38,16 @@
     },
     {
       "id": "wl_calmagd", "name": "WL 칼슘·마그네슘·비타민D", "brand": "WelLink 샘플", "sold_on_platform": true,
-      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 2정", "price_per_day": 400, "timing": "evening",
-      "ingredients": [{"id": "calcium", "amount": 600}, {"id": "magnesium", "amount": 250}, {"id": "vitamin_d", "amount": 10}],
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 2회, 1회 1정",
+      "amount_basis": "per_serving", "servings_per_day": 2, "price_per_day": 400, "timing": "evening",
+      "ingredients": [{"id": "calcium", "amount": 300, "unit": "mg"}, {"id": "magnesium", "amount": 125, "unit": "mg"}, {"id": "vitamin_d", "amount": 200, "unit": "IU"}],
       "allergens": [],
       "cautions": ["칼슘 섭취 시 철분제와는 시간 간격을 두고 섭취하세요."]
     },
     {
       "id": "wl_vitd", "name": "WL 비타민D 1000IU", "brand": "WelLink 샘플", "sold_on_platform": true,
       "form": "연질캡슐", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1캡슐", "price_per_day": 200, "timing": "any",
-      "ingredients": [{"id": "vitamin_d", "amount": 25}],
+      "ingredients": [{"id": "vitamin_d", "amount": 1000, "unit": "IU"}],
       "allergens": [],
       "cautions": []
     },
@@ -154,8 +155,9 @@
     },
     {
       "id": "wl_glucosamine", "name": "WL 글루코사민", "brand": "WelLink 샘플", "sold_on_platform": true,
-      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 2정", "price_per_day": 500, "timing": "any",
-      "ingredients": [{"id": "glucosamine", "amount": 1500}],
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 2회, 1회 1정",
+      "amount_basis": "per_serving", "servings_per_day": 2, "price_per_day": 500, "timing": "any",
+      "ingredients": [{"id": "glucosamine", "amount": 750, "unit": "mg"}],
       "allergens": ["crustacean"],
       "cautions": ["게·새우 등 갑각류에 알레르기가 있는 경우 섭취에 주의하세요.", "혈액항응고제(와파린) 복용 시 섭취에 주의하세요."]
     },
@@ -199,14 +201,15 @@
     {
       "id": "ext_vitd5000", "name": "시판 고함량 비타민D 5000IU (예시)", "brand": "타사 제품 예시", "sold_on_platform": false,
       "form": "연질캡슐", "package": "병", "daily_dose_text": "1일 1회, 1회 1캡슐", "price_per_day": 0, "timing": "any",
-      "ingredients": [{"id": "vitamin_d", "amount": 125}],
+      "ingredients": [{"id": "vitamin_d", "amount": 5000, "unit": "IU"}],
       "allergens": [],
       "cautions": []
     },
     {
       "id": "ext_calmagd", "name": "시판 칼슘·마그네슘·비타민D (예시)", "brand": "타사 제품 예시", "sold_on_platform": false,
-      "form": "정제", "package": "병", "daily_dose_text": "1일 1회, 1회 2정", "price_per_day": 0, "timing": "evening",
-      "ingredients": [{"id": "calcium", "amount": 600}, {"id": "magnesium", "amount": 300}, {"id": "vitamin_d", "amount": 25}],
+      "form": "정제", "package": "병", "daily_dose_text": "1일 2회, 1회 1정",
+      "amount_basis": "per_serving", "servings_per_day": 2, "price_per_day": 0, "timing": "evening",
+      "ingredients": [{"id": "calcium", "amount": 300, "unit": "mg"}, {"id": "magnesium", "amount": 150, "unit": "mg"}, {"id": "vitamin_d", "amount": 500, "unit": "IU"}],
       "allergens": [],
       "cautions": []
     },
@@ -223,15 +226,16 @@
     },
     {
       "id": "ext_omega3", "name": "시판 오메가3 (예시)", "brand": "타사 제품 예시", "sold_on_platform": false,
-      "form": "연질캡슐", "package": "병", "daily_dose_text": "1일 1회, 1회 2캡슐", "price_per_day": 0, "timing": "any",
-      "ingredients": [{"id": "epa_dha", "amount": 900}, {"id": "vitamin_e", "amount": 10}],
+      "form": "연질캡슐", "package": "병", "daily_dose_text": "1일 2회, 1회 1캡슐",
+      "amount_basis": "per_serving", "servings_per_day": 2, "price_per_day": 0, "timing": "any",
+      "ingredients": [{"id": "epa_dha", "amount": 0.45, "unit": "g"}, {"id": "vitamin_e", "amount": 7.5, "unit": "IU"}],
       "allergens": ["fish"],
       "cautions": ["의약품(항응고제·항혈소판제) 복용 시 섭취에 주의하세요."]
     },
     {
       "id": "ext_probiotics", "name": "시판 유산균 (예시)", "brand": "타사 제품 예시", "sold_on_platform": false,
       "form": "캡슐", "package": "병", "daily_dose_text": "1일 1회, 1회 1캡슐", "price_per_day": 0, "timing": "morning",
-      "ingredients": [{"id": "probiotics", "amount": 100}],
+      "ingredients": [{"id": "probiotics", "amount": 10000000000, "unit": "CFU"}],
       "allergens": [],
       "cautions": []
     }

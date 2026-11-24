@@ -8,7 +8,10 @@ client = TestClient(app)
 def test_health_and_catalog():
     assert client.get("/health").json()["status"] == "ok"
     goals = client.get("/v1/catalog/goals").json()
-    assert {"id": "fatigue", "name": "피로·컨디션 관리"} in goals
+    assert any(g["id"] == "fatigue" and g["tier"] == "core" for g in goals)
+    core = client.get("/v1/catalog/goals", params={"tier": "core"}).json()
+    assert {"fatigue", "immunity", "body_fat", "inflammation_care"} <= {g["id"] for g in core}
+    assert all(g["tier"] == "core" for g in core)
     products = client.get("/v1/catalog/products", params={"platform_only": True}).json()
     assert products and all(p["sold_on_platform"] for p in products)
     assert client.get("/v1/catalog/drugs", params={"q": "와파"}).json()[0]["name"] == "와파린"

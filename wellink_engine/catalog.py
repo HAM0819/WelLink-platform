@@ -16,7 +16,8 @@ from typing import Literal, Optional, Union
 from pydantic import BaseModel, Field
 
 from .models import Severity
-from .text import normalize
+from .text import fmt_amount, normalize
+from .units import UnitError, to_canonical
 
 DEFAULT_DATA_DIR = Path(__file__).parent / "data"
 
@@ -73,9 +74,17 @@ class Ingredient(BaseModel):
 class ProductIngredient(BaseModel):
     id: str
     amount: float
+    unit: Optional[str] = Field(None, description="표시 단위 (생략하면 성분 기준 단위). 예: IU, mg, μg, g, 억CFU")
 
 
 class Product(BaseModel):
+    """제품 표시사항 그대로의 정보.
+
+    amount_basis가 per_serving이면 ingredients의 amount는 '1회 섭취량당' 함량이고,
+    servings_per_day(1일 섭취 횟수)를 곱해 하루 섭취량으로 환산한다.
+    엔진 내부의 모든 계산은 이 환산된 '1일 기준 · 성분 기준 단위' 값으로 한다.
+    """
+
     id: str
     name: str
     brand: Optional[str] = None
@@ -83,6 +92,8 @@ class Product(BaseModel):
     form: Optional[str] = None
     package: Optional[str] = None
     daily_dose_text: Optional[str] = None
+    amount_basis: Literal["per_day", "per_serving"] = "per_day"
+    servings_per_day: float = Field(1.0, gt=0)
     price_per_day: int = 0
     timing: Literal["morning", "evening", "any"] = "any"
     ingredients: list[ProductIngredient]
@@ -93,6 +104,8 @@ class Product(BaseModel):
 class Goal(BaseModel):
     id: str
     name: str
+    tier: Literal["core", "extended"] = "core"
+    description: str = ""
     tags: dict[str, float]
     priority_nutrients: list[str] = Field(default_factory=list)
 
@@ -215,6 +228,22 @@ class TagInfo:
 
 
 @dataclass
+class DoseLine:
+    """표시값 → 1일 기준값 환산 기록 (근거 표시용)."""
+
+    ingredient_id: str
+    per_day: float      # 성분 기준 단위, 표시된 1일 섭취량 기준
+    label_text: str     # 예: "1회 1,000IU × 1일 2회 = 50μg"
+
+
+@dataclass
+class NormalizedDose:
+    per_day: dict[str, float]
+    lines: dict[str, list[DoseLine]]
+    errors: list[str]
+
+
+@dataclass
 class DrugMatch:
     input_text: str
     drug_class: DrugClass
@@ -231,6 +260,10 @@ class Catalog:
         ing = self._load("ingredients.json")
         ref = self._load("nutrient_reference.json")
         prod = self._load("products.json")
+        extra_products: list[dict] = []
+        for extra in sorted((self.data_dir / "products.d").glob("*.json")):
+            with open(extra, encoding="utf-8") as f:
+                extra_products += json.load(f).get("products", [])
         goals = self._load("goals.json")
         drugs = self._load("drugs.json")
         inter = self._load("interactions.json")
@@ -242,7 +275,12 @@ class Catalog:
         self.kdri_source: str = ref["source"]
         self.age_bands: list[list[int]] = ref["age_bands"]
         self.kdri: dict[str, NutrientRef] = {k: NutrientRef(**v) for k, v in ref["nutrients"].items()}
-        self.products: dict[str, Product] = {d["id"]: Product(**d) for d in prod["products"]}
+        self.products: dict[str, Product] = {}
+        for d in [*prod["products"], *extra_products]:
+            if d["id"] in self.products:
+                raise ValueError(f"제품 ID가 중복됐어요: '{d['id']}'")
+            self.products[d["id"]] = Product(**d)
+        self._dose_cache: dict[str, NormalizedDose] = {}
         self.allergens: dict[str, Allergen] = {k: Allergen(**v) for k, v in prod.get("allergens", {}).items()}
         self.goals: dict[str, Goal] = {d["id"]: Goal(**d) for d in goals["goals"]}
         self.tag_labels: dict[str, str] = goals.get("tag_labels", {})
@@ -312,6 +350,9 @@ class Catalog:
         for p in self.products.values():
             for pi in p.ingredients:
                 need_ing(f"products.json {p.id}", pi.id)
+            if all(pi.id in self.ingredients for pi in p.ingredients):
+                for err in self.normalize_dose(p).errors:
+                    errors.append(f"products.json {p.id}: {err}")
             for a in p.allergens:
                 if a not in self.allergens:
                     errors.append(f"products.json {p.id}: 알 수 없는 알레르기 ID '{a}'")
@@ -451,18 +492,50 @@ class Catalog:
             )
         return tags
 
-    def product_amounts(self, product: Product, servings: float = 1.0) -> dict[str, float]:
-        out: dict[str, float] = {}
+    def normalize_dose(self, product: Product) -> NormalizedDose:
+        """제품 표시값(단위·1회/1일 기준·1일 섭취 횟수)을 '1일 기준 · 성분 기준 단위'로 환산한다."""
+        cached = self._dose_cache.get(product.id)
+        is_catalog = self.products.get(product.id) is product
+        if cached is not None and is_catalog:
+            return cached
+        per_day: dict[str, float] = {}
+        lines: dict[str, list[DoseLine]] = {}
+        errors: list[str] = []
+        times = product.servings_per_day if product.amount_basis == "per_serving" else 1.0
         for pi in product.ingredients:
-            out[pi.id] = out.get(pi.id, 0.0) + pi.amount * servings
-        return out
+            ing = self.ingredients[pi.id]
+            unit = pi.unit or ing.unit
+            try:
+                one = to_canonical(pi.amount, unit, ing.unit, ing.iu_factor)
+            except UnitError as e:
+                errors.append(f"{ing.name}: {e}")
+                continue
+            value = one * times
+            canon = fmt_amount(value, ing.unit_label.split(" (")[0])
+            label = fmt_amount(pi.amount, unit if pi.unit else ing.unit_label.split(" (")[0])
+            if product.amount_basis == "per_serving":
+                text = f"1회 {label} × 1일 {times:g}회 = {canon}"
+            elif pi.unit and _unit_differs(pi.unit, ing.unit):
+                text = f"1일 {label} = {canon}"
+            else:
+                text = f"1일 {canon}"
+            per_day[pi.id] = per_day.get(pi.id, 0.0) + value
+            lines.setdefault(pi.id, []).append(DoseLine(pi.id, value, text))
+        result = NormalizedDose(per_day, lines, errors)
+        if is_catalog:
+            self._dose_cache[product.id] = result
+        return result
+
+    def product_amounts(self, product: Product, servings: float = 1.0) -> dict[str, float]:
+        """하루 섭취량(성분 기준 단위). servings는 표시된 1일 섭취량 대비 실제 섭취 배수."""
+        return {k: v * servings for k, v in self.normalize_dose(product).per_day.items()}
 
     def product_functions(self, product: Product) -> list[str]:
         """제품이 표시할 수 있는 기능성 문구 (성분명: 문구)."""
         out: list[str] = []
-        for pi in product.ingredients:
-            ing = self.ingredients[pi.id]
-            if self.claim_factor(ing, pi.amount) <= 0:
+        for iid, amount in self.normalize_dose(product).per_day.items():
+            ing = self.ingredients[iid]
+            if self.claim_factor(ing, amount) <= 0:
                 continue
             for claim in ing.claims:
                 line = f"{ing.name}: {claim.text}"
@@ -475,6 +548,10 @@ class Catalog:
 
     def tag_label(self, tag: str) -> str:
         return self.tag_labels.get(tag, "종합 영양" if tag == "multinutrient" else tag)
+
+
+def _unit_differs(a: str, b: str) -> bool:
+    return normalize(a).replace("µ", "μ") != normalize(b).replace("µ", "μ")
 
 
 @lru_cache(maxsize=4)

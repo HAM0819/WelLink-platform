@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Literal, Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -42,9 +43,16 @@ def health() -> dict:
 
 
 @app.get("/v1/catalog/goals", tags=["catalog"], summary="선택 가능한 건강 관리 목적")
-def list_goals() -> list[dict]:
+def list_goals(
+    tier: Optional[Literal["core", "extended"]] = Query(
+        None, description="core: 초기 앱에 노출하는 일반 목적 / extended: 고령층·특정층 확장 목적 / 생략: 전체"),
+) -> list[dict]:
     cat = get_catalog()
-    return [{"id": g.id, "name": g.name} for g in cat.goals.values()]
+    return [
+        {"id": g.id, "name": g.name, "tier": g.tier, "description": g.description}
+        for g in cat.goals.values()
+        if tier is None or g.tier == tier
+    ]
 
 
 @app.get("/v1/catalog/family-history", tags=["catalog"], summary="선택 가능한 가족력 항목")

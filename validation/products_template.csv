@@ -1,0 +1,7 @@
+product_id,product_name,brand,sold_on_platform,daily_dose_text,amount_basis,servings_per_day,price_per_day,timing,allergens,cautions,ingredient,amount,unit
+mk_example_multi,예시 종합비타민,예시브랜드,false,"1일 1회, 1회 1정",per_day,1,0,morning,,특정질환이 있는 경우 전문가와 상담하세요.,비타민D,1000,IU
+mk_example_multi,,,,,,,,,,,비타민C,100,mg
+mk_example_multi,,,,,,,,,,,아연,8.5,mg
+mk_example_calmag,예시 칼슘마그네슘,예시브랜드,false,"1일 2회, 1회 1정",per_serving,2,0,evening,우유,칼슘 섭취 시 철분제와 간격을 두세요.|임산부는 전문가와 상담하세요.,칼슘,300,mg
+mk_example_calmag,,,,,,,,,,,마그네슘,150,mg
+mk_example_calmag,,,,,,,,,,,비타민D,400,IU

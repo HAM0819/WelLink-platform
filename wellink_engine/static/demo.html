@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WelLink 조합 점검</title>
+<style>
+:root {
+  --bg: #f4f5f7; --card: #ffffff; --text: #17191c; --muted: #5f6670; --line: #e3e6ea;
+  --brand: #1f7a5c; --brand-soft: #e3f2ec; --brand-text: #ffffff;
+  --avoid: #b42318; --avoid-soft: #fdecea; --warning: #b54708; --warning-soft: #fef0e4;
+  --caution: #8a6d00; --caution-soft: #fdf6d8; --info: #3b5bab; --info-soft: #e9eef9;
+  --ok: #1f7a5c; --ok-soft: #e3f2ec; --bar: #d6dbe1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111315; --card: #1b1e21; --text: #eceef0; --muted: #a2a9b1; --line: #2c3136;
+    --brand: #4cc79a; --brand-soft: #1b3229; --brand-text: #0d1f18;
+    --avoid: #ff8a80; --avoid-soft: #3a1f1d; --warning: #ffb86b; --warning-soft: #3a2a19;
+    --caution: #f2d266; --caution-soft: #34301a; --info: #9db5ff; --info-soft: #1e2639;
+    --ok: #4cc79a; --ok-soft: #1b3229; --bar: #3a4047;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif; }
+.app { max-width: 440px; margin: 0 auto; padding: 16px 16px 48px; }
+header { display: flex; align-items: baseline; gap: 8px; margin: 4px 0 14px; }
+header h1 { font-size: 20px; margin: 0; }
+header span { color: var(--muted); font-size: 13px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+.card h2 { font-size: 16px; margin: 0 0 10px; display: flex; justify-content: space-between; align-items: center; }
+.card h2 small { font-weight: 400; color: var(--muted); font-size: 12px; }
+label.field { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 6px; }
+input[type=number], input[type=text], select, textarea {
+  width: 100%; padding: 9px 10px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--card); color: var(--text); font: inherit; }
+textarea { min-height: 64px; resize: vertical; }
+.row { display: flex; gap: 8px; align-items: center; }
+.row > * { flex: 1; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 999px;
+  padding: 6px 11px; font: inherit; font-size: 13px; cursor: pointer; }
+.chip.on { background: var(--brand); color: var(--brand-text); border-color: var(--brand); }
+.chip .n { display: inline-block; min-width: 16px; font-weight: 700; margin-right: 3px; }
+.toggle { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+button.primary { width: 100%; padding: 13px; border: 0; border-radius: 12px; background: var(--brand);
+  color: var(--brand-text); font: inherit; font-weight: 700; cursor: pointer; margin-top: 4px; }
+button.small { border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 8px;
+  padding: 4px 9px; font: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; }
+button.small.brand { border-color: var(--brand); color: var(--brand); }
+.muted { color: var(--muted); font-size: 13px; }
+.summary { border-radius: 14px; padding: 14px; margin-bottom: 12px; border: 1px solid var(--line); }
+.summary b { font-size: 17px; display: block; margin-bottom: 8px; }
+.s-avoid { background: var(--avoid-soft); } .s-adjust { background: var(--warning-soft); }
+.s-review { background: var(--caution-soft); } .s-ok { background: var(--ok-soft); }
+.counts { display: flex; flex-wrap: wrap; gap: 6px; }
+.count { background: var(--card); border-radius: 999px; padding: 3px 10px; font-size: 12px; border: 1px solid var(--line); }
+.count b { display: inline; font-size: 12px; margin: 0; }
+.item { border-top: 1px solid var(--line); padding: 10px 0; }
+.item:first-of-type { border-top: 0; padding-top: 0; }
+.item-head { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.item-name { font-weight: 600; }
+.badge { display: inline-block; font-size: 11px; padding: 1px 7px; border-radius: 6px; margin-right: 4px; vertical-align: 1px; }
+.b-rec { background: var(--brand-soft); color: var(--brand); }
+.b-ext { background: var(--info-soft); color: var(--info); }
+.b-lock { background: var(--caution-soft); color: var(--caution); }
+.reasons { margin: 6px 0 0; padding-left: 16px; font-size: 13px; color: var(--muted); }
+.actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.finding { border-left: 4px solid var(--line); padding: 8px 10px; margin: 8px 0; border-radius: 6px; background: var(--bg); }
+.f-avoid { border-color: var(--avoid); } .f-warning { border-color: var(--warning); }
+.f-caution { border-color: var(--caution); } .f-info { border-color: var(--info); }
+.sev { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 5px; margin-right: 4px; }
+.sev-avoid { background: var(--avoid-soft); color: var(--avoid); } .sev-warning { background: var(--warning-soft); color: var(--warning); }
+.sev-caution { background: var(--caution-soft); color: var(--caution); } .sev-info { background: var(--info-soft); color: var(--info); }
+.f-title { font-weight: 600; font-size: 14px; }
+.f-msg { font-size: 13px; margin: 4px 0; }
+.f-guide { font-size: 13px; color: var(--muted); }
+details { margin-top: 4px; font-size: 12px; color: var(--muted); }
+details summary { cursor: pointer; }
+details ul { margin: 4px 0; padding-left: 16px; }
+.sugg { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px;
+  padding: 6px 0; border-top: 1px dashed var(--line); }
+.sugg:first-child { border-top: 0; }
+.new-issue { color: var(--warning); font-size: 12px; }
+.dist { margin: 8px 0; }
+.dist-top { display: flex; justify-content: space-between; font-size: 13px; }
+.dist-top span:last-child { color: var(--muted); }
+.bar { position: relative; height: 8px; background: var(--bar); border-radius: 4px; margin-top: 4px; overflow: visible; }
+.bar > i { display: block; height: 100%; border-radius: 4px; background: var(--ok); }
+.bar > .mark { position: absolute; top: -3px; width: 2px; height: 14px; background: var(--text); opacity: .55; }
+.st-excess > i { background: var(--avoid); } .st-near_upper > i { background: var(--warning); }
+.st-low > i { background: var(--caution); } .st-no_reference > i { background: var(--muted); }
+.slot { display: flex; gap: 10px; padding: 6px 0; font-size: 14px; }
+.slot b { width: 36px; flex: none; }
+.step { font-size: 13px; padding: 6px 0; border-top: 1px dashed var(--line); }
+.step:first-child { border-top: 0; }
+.hidden { display: none; }
+.err { color: var(--avoid); font-size: 13px; margin-top: 8px; }
+ul.plain { margin: 0; padding-left: 16px; font-size: 13px; color: var(--muted); }
+.b-pick { background: var(--info-soft); color: var(--info); }
+.b-data { background: var(--warning-soft); color: var(--warning); }
+.b-sample { background: var(--bar); color: var(--muted); }
+button.secondary { width: 100%; padding: 12px; border: 1px solid var(--brand); border-radius: 12px; background: var(--card);
+  color: var(--brand); font: inherit; font-weight: 700; cursor: pointer; margin-top: 8px; }
+.goal { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px solid var(--line); }
+.goal:first-child { border-top: 0; padding-top: 0; }
+.goal .mark-ok { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+.goal .yes { background: var(--ok-soft); color: var(--ok); } .goal .no { background: var(--caution-soft); color: var(--caution); }
+.ai-block { padding: 8px 0; border-top: 1px dashed var(--line); }
+.ai-block:first-child { border-top: 0; padding-top: 0; }
+.ai-block h3 { font-size: 14px; margin: 0 0 6px; }
+.data-note { font-size: 12px; color: var(--warning); margin-top: 4px; }
+.funcs { margin: 6px 0 0; padding-left: 16px; font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header><h1>WelLink</h1><span>맞춤 조합 추천 · 성분 점검 (데모)</span></header>
+  <select id="persona" style="margin-bottom:12px">
+    <option value="">예시 사용자 불러오기</option>
+    <option value="A">사용자 A — 34세 남성 직장인 · 고혈압 가족력 · 알레그라 복용</option>
+  </select>
+
+  <section class="card" id="profile-card">
+    <h2>① 건강 프로필 <small>계산에만 쓰고 저장하지 않아요</small></h2>
+    <div class="row">
+      <div><label class="field" for="age">나이</label><input id="age" type="number" min="19" max="120" value="34"></div>
+      <div><label class="field">성별</label>
+        <div class="chips" id="sex"><button class="chip on" data-v="male">남성</button><button class="chip" data-v="female">여성</button></div>
+      </div>
+    </div>
+    <label class="field">건강 관리 목적 <span class="muted">(누른 순서 = 중요한 순서, 최대 5개)</span></label>
+    <div class="chips" id="goals"></div>
+    <label class="field">확장 목적 <span class="muted">(고령층 등, 추후 노출 예정)</span></label>
+    <div class="chips" id="goals-ext"></div>
+    <label class="field">가족력 <span class="muted">(선택)</span></label>
+    <div class="chips" id="family"></div>
+    <label class="field" for="meds">복용 중인 약 <span class="muted">(쉼표로 구분, 성분명 또는 제품명)</span></label>
+    <input id="meds" type="text" placeholder="예: 와파린, 씬지로이드" value="아스피린">
+    <label class="field" for="allergies">알레르기 <span class="muted">(선택)</span></label>
+    <input id="allergies" type="text" placeholder="예: 갑각류, 우유">
+    <div class="row" style="margin-top:10px">
+      <label class="toggle"><input type="checkbox" id="smoker"> 흡연</label>
+      <label class="toggle"><input type="checkbox" id="preg"> 임신·수유 중</label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>② 제품 담기</h2>
+    <label class="field">플랫폼에서 직접 고른 제품</label>
+    <div id="picked-list" class="muted">없음</div>
+    <div class="row" style="margin-top:8px">
+      <select id="pick-select"></select>
+      <button class="small" id="pick-add" style="flex:none">담기</button>
+    </div>
+    <label class="field">지금 먹고 있는 제품 <span class="muted">(타사 제품 포함)</span></label>
+    <div id="current-list" class="muted">없음</div>
+    <div class="row" style="margin-top:8px">
+      <select id="current-select"></select>
+      <button class="small" id="current-add" style="flex:none">추가</button>
+    </div>
+    <details style="margin-top:8px"><summary>목록에 없는 제품 직접 입력</summary>
+      <input id="custom-name" type="text" placeholder="제품명" style="margin-top:6px">
+      <div class="row" style="margin-top:6px">
+        <select id="custom-basis"><option value="per_serving">함량: 1회 섭취량당</option><option value="per_day">함량: 1일 섭취량당</option></select>
+        <label class="toggle" style="flex:none">1일 <input id="custom-times" type="number" min="1" max="10" value="1" style="width:56px"> 회</label>
+      </div>
+      <textarea id="custom-ings" placeholder="표시사항 그대로, 한 줄에 하나씩: 성분명 양 단위&#10;비타민D 2500 IU&#10;아연 15 mg" style="margin-top:6px"></textarea>
+      <button class="small" id="custom-add" style="margin-top:6px">직접 입력 제품 추가</button>
+    </details>
+    <button class="primary" id="run-check" style="margin-top:12px">고른 제품 성분 점검하기</button>
+    <button class="secondary" id="run">AI 추천 받고 성분 점검하기</button>
+    <div class="err hidden" id="err"></div>
+  </section>
+
+  <div id="results" class="hidden">
+    <div class="summary" id="summary"></div>
+    <section class="card"><h2>목적별 충족 <small>인정된 기능성 기준</small></h2><div id="goals-cov"></div></section>
+    <section class="card"><h2>③ 내 조합 <small id="price"></small></h2><div id="combo"></div>
+      <div class="row" style="margin-top:10px"><select id="add-select"></select><button class="small brand" id="add-btn" style="flex:none">추가 후 재점검</button></div>
+    </section>
+    <section class="card hidden" id="ai-card"><h2>AI 제안 <small>참고해서 직접 고르세요</small></h2><div id="ai"></div></section>
+    <section class="card" id="revision-card"><h2>자동 수정안 <small>위험도가 높은 항목부터</small></h2><div id="revision"></div></section>
+    <section class="card"><h2>④ 점검 결과 <small>근거와 함께</small></h2><div id="findings"></div></section>
+    <section class="card"><h2>성분 분포 <small>막대 끝 = 상한(최대) 기준, 세로선 = 권장(최소) 기준</small></h2><div id="dist"></div></section>
+    <section class="card"><h2>섭취 시간표</h2><div id="schedule"></div></section>
+    <section class="card" id="notes-card"><h2>참고</h2><div id="notes"></div></section>
+  </div>
+</div>
+
+<script>
+const API = "";
+const state = { sex: "male", goals: ["cardio", "fatigue"], family: ["dyslipidemia"], current: [], picked: [], items: [],
+  recommended: {}, excluded: [], notes: [], report: null, revision: null, products: [] };
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const won = (n) => `${Number(n || 0).toLocaleString("ko-KR")}원`;
+
+async function api(path, body) {
+  const res = await fetch(API + path, body ? { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) } : {});
+  const data = await res.json();
+  if (!res.ok) throw new Error(typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail));
+  return data;
+}
+
+function chipGroup(el, options, selected, multi, onChange) {
+  el.innerHTML = "";
+  options.forEach((o) => {
+    const b = document.createElement("button");
+    b.className = "chip"; b.type = "button";
+    const idx = selected.indexOf(o.id);
+    if (idx >= 0) b.classList.add("on");
+    b.innerHTML = (multi && idx >= 0 ? `<span class="n">${idx + 1}</span>` : "") + esc(o.name);
+    b.onclick = () => {
+      const i = selected.indexOf(o.id);
+      if (i >= 0) selected.splice(i, 1); else if (selected.length < 5) selected.push(o.id);
+      onChange();
+    };
+    el.appendChild(b);
+  });
+}
+
+function profile() {
+  const split = (v) => v.split(",").map((s) => s.trim()).filter(Boolean);
+  return { age: Number($("age").value), sex: state.sex, goals: state.goals, family_history: state.family,
+    medications: split($("meds").value), allergies: split($("allergies").value),
+    smoker: $("smoker").checked, pregnant_or_lactating: $("preg").checked };
+}
+
+function productName(item) {
+  if (item.product_id) return (state.products.find((p) => p.id === item.product_id) || {}).name || item.product_id;
+  return item.name;
+}
+
+function renderCurrent() {
+  $("current-list").innerHTML = state.current.length ? state.current.map((it, i) =>
+    `<div class="row" style="margin:4px 0"><span>${esc(productName(it))}</span><button class="small" style="flex:none" data-rm="${i}">삭제</button></div>`).join("") : "없음";
+  $("current-list").querySelectorAll("[data-rm]").forEach((b) => b.onclick = () => { state.current.splice(+b.dataset.rm, 1); renderCurrent(); });
+}
+
+function renderPicked() {
+  $("picked-list").innerHTML = state.picked.length ? state.picked.map((it, i) =>
+    `<div class="row" style="margin:4px 0"><span>${esc(productName(it))}</span><button class="small" style="flex:none" data-unpick="${i}">삭제</button></div>`).join("") : "없음";
+  $("picked-list").querySelectorAll("[data-unpick]").forEach((b) => b.onclick = () => { state.picked.splice(+b.dataset.unpick, 1); renderPicked(); });
+}
+
+function parseCustom() {
+  const rows = $("custom-ings").value.split("\n").map((l) => l.trim()).filter(Boolean);
+  const ingredients = [];
+  for (const r of rows) {
+    const parts = r.split(/\s+/);
+    if (parts.length < 3) throw new Error(`형식을 확인하세요: "${r}" (성분명 양 단위)`);
+    const unit = parts.pop(); const amount = Number(parts.pop().replace(/,/g, ""));
+    if (!(amount > 0)) throw new Error(`양을 숫자로 입력하세요: "${r}"`);
+    ingredients.push({ name: parts.join(" "), amount, unit });
+  }
+  return ingredients;
+}
+
+async function runCheck() {
+  $("err").classList.add("hidden");
+  try {
+    if (!state.picked.length && !state.current.length) throw new Error("점검할 제품을 담아 주세요.");
+    state.items = [...state.picked, ...state.current];
+    state.recommended = {}; state.excluded = [];
+    const [chk, extra, fresh] = await Promise.all([
+      api("/v1/checks", { profile: profile(), items: state.items }),
+      api("/v1/recommendations", { profile: profile(), current_products: state.items, max_products: 2 }),
+      api("/v1/recommendations", { profile: profile(), current_products: state.current }),
+    ]);
+    state.notes = extra.profile_notes.filter((n) => !n.startsWith("지금 조합으로"));
+    state.ai = { extra, fresh };
+    show(chk.report, chk.revision);
+  } catch (e) { $("err").textContent = e.message; $("err").classList.remove("hidden"); }
+}
+
+function renderAI() {
+  const ai = state.ai;
+  if (!ai) { $("ai-card").classList.add("hidden"); return; }
+  $("ai-card").classList.remove("hidden");
+  const extra = ai.extra.recommended;
+  const recList = (list) => `<ul class="reasons">${list.map((p) => `<li><b>${esc(p.name)}</b>${p.price_per_day ? ` (하루 ${won(p.price_per_day)})` : ""} — ${esc(p.reasons.map((r) => r.text).join(" / "))}</li>`).join("")}</ul>`;
+  const pickedNames = state.picked.map(productName);
+  const freshNames = ai.fresh.recommended.map((p) => p.name);
+  const same = freshNames.filter((n) => pickedNames.includes(n));
+  $("ai").innerHTML = `
+    <div class="ai-block"><h3>고른 조합에 더할 제품</h3>
+      ${extra.length ? recList(extra) + `<div class="actions">${extra.map((p, i) => `<button class="small brand" data-add-ai="${i}">${esc(p.name)} 추가</button>`).join("")}</div>`
+        : `<p class="muted" style="margin:0">고르신 제품으로 선택한 목적이 이미 채워져 있어 더할 제품이 없어요.</p>`}</div>
+    <div class="ai-block"><h3>AI가 처음부터 골랐다면</h3>
+      ${recList(ai.fresh.recommended)}
+      <p class="muted" style="margin:4px 0">${ai.fresh.recommended.length}개 제품${same.length ? ` · 고르신 제품과 겹침: ${same.map(esc).join(", ")}` : ""}${ai.fresh.excluded.length ? ` · 제외 ${ai.fresh.excluded.length}개(복용 약 등)` : ""}</p>
+      <button class="small brand" id="use-fresh">이 구성으로 바꿔 점검하기</button></div>`;
+  $("ai").querySelectorAll("[data-add-ai]").forEach((b) => b.onclick = () => { state.items.push({ product_id: extra[+b.dataset.addAi].product_id }); recheck(); });
+  $("use-fresh").onclick = () => {
+    state.items = ai.fresh.combination;
+    state.recommended = Object.fromEntries(ai.fresh.recommended.map((r) => [r.product_id, r]));
+    state.excluded = ai.fresh.excluded; state.ai = null; recheck();
+  };
+}
+
+async function runRecommend() {
+  $("err").classList.add("hidden");
+  state.ai = null;
+  try {
+    const data = await api("/v1/recommendations", { profile: profile(), current_products: state.current });
+    state.items = data.combination;
+    state.recommended = Object.fromEntries(data.recommended.map((r) => [r.product_id, r]));
+    state.excluded = data.excluded; state.notes = data.profile_notes;
+    show(data.report, data.revision);
+  } catch (e) { $("err").textContent = e.message; $("err").classList.remove("hidden"); }
+}
+
+async function recheck() {
+  if (!state.items.length) { $("results").classList.add("hidden"); return; }
+  try {
+    const data = await api("/v1/checks", { profile: profile(), items: state.items });
+    show(data.report, data.revision);
+  } catch (e) { alert(e.message); }
+}
+
+function itemIndexByKey(key) { return state.report.items.findIndex((i) => i.key === key); }
+
+function applySuggestion(s) {
+  const idx = s.target_item_key ? itemIndexByKey(s.target_item_key) : -1;
+  if (s.action === "remove") state.items.splice(idx, 1);
+  else if (s.action === "replace") state.items[idx] = { product_id: s.new_product_id };
+  else if (s.action === "add") state.items.push({ product_id: s.new_product_id });
+  else if (s.action === "reduce") state.items[idx] = { ...state.items[idx], servings: s.new_servings };
+  recheck();
+}
+
+function show(report, revision) {
+  state.report = report; state.revision = revision;
+  $("results").classList.remove("hidden");
+  const sum = report.summary;
+  const cats = { excess: "과다", duplicate: "중복", deficiency: "부족", interaction: "병용 주의", caution: "섭취 주의", check_needed: "확인 필요" };
+  $("summary").className = `summary s-${sum.overall}`;
+  $("summary").innerHTML = `<b>${esc(sum.overall_label)}</b><div class="counts">${Object.entries(cats).map(([k, v]) =>
+    `<span class="count">${v} <b>${sum.counts_by_category[k] || 0}</b></span>`).join("")}</div>`;
+  $("price").textContent = sum.total_price_per_day ? `하루 ${won(sum.total_price_per_day)} (플랫폼 제품 기준)` : "가격 미정";
+
+  // 목적별 충족
+  $("goals-cov").innerHTML = report.goal_coverage.map((g) => `<div class="goal">
+      <span class="mark-ok ${g.covered ? "yes" : "no"}">${g.covered ? "✓" : "!"}</span>
+      <div><b>${esc(g.name)}</b> <span class="muted">${g.covered ? "충족" : "보완 필요"} · 충족도 ${Math.round(g.coverage * 100)}%</span>
+        <div class="muted">${g.by_items.length ? esc(g.by_items.join(", ")) : "해당 제품 없음"}</div>
+        ${g.note ? `<div class="muted">${esc(g.note)}</div>` : ""}</div></div>`).join("");
+
+  // 조합
+  $("combo").innerHTML = report.items.map((it, i) => {
+    const rec = state.recommended[it.product_id];
+    const isRec = rec && it.source === "platform";
+    const alts = isRec ? rec.alternatives : [];
+    return `<div class="item"><div class="item-head"><div>
+        ${isRec ? '<span class="badge b-rec">AI 추천</span>' : state.picked.some((x) => x.product_id === it.product_id) ? '<span class="badge b-pick">직접 선택</span>'
+          : it.source === "external" ? '<span class="badge b-ext">현재 복용</span>' : '<span class="badge b-rec">추가</span>'}
+        ${it.locked ? '<span class="badge b-lock">고정</span>' : ""}
+        ${it.data_status === "partial" ? '<span class="badge b-data">표시값 확인 필요</span>' : it.data_status === "sample" ? '<span class="badge b-sample">가상 제품</span>' : ""}
+        <span class="item-name">${esc(it.name)}</span>
+        <div class="muted">${esc(it.daily_dose_text || "")}${it.price_per_day ? " · 하루 " + won(it.price_per_day) : ""}</div></div></div>
+      ${isRec ? `<ul class="reasons">${rec.reasons.map((r) => `<li>${esc(r.text)}</li>`).join("")}</ul>`
+        : it.functions.length ? `<ul class="funcs">${it.functions.slice(0, 4).map((f) => `<li>${esc(f)}</li>`).join("")}${it.functions.length > 4 ? `<li>외 ${it.functions.length - 4}개</li>` : ""}</ul>` : ""}
+      ${it.estimated_ingredients.length ? `<div class="data-note">가정값으로 계산: ${esc(it.estimated_ingredients.join(", "))}</div>` : ""}
+      <div class="actions">
+        <button class="small" data-lock="${i}">${it.locked ? "고정 해제" : "고정"}</button>
+        <button class="small" data-del="${i}">빼기</button>
+        <label class="toggle muted" style="font-size:12px">실제 1일 <input type="number" data-times="${i}" min="0.5" max="20" step="0.5" value="${it.actual_servings_per_day}" style="width:52px;padding:3px 5px;font-size:12px"> 회${it.actual_servings_per_day !== it.label_servings_per_day ? ` <span class="badge b-lock">표시 ${it.label_servings_per_day}회</span>` : ""}</label>
+        ${alts.length ? `<select data-alt="${i}" style="width:auto;flex:1;padding:4px 6px;font-size:12px"><option value="">다른 제품으로 바꾸기</option>${alts.map((a) =>
+          `<option value="${esc(a.product_id)}">${esc(a.name)} — ${esc(a.reason)}</option>`).join("")}</select>` : ""}
+      </div></div>`;
+  }).join("");
+  $("combo").querySelectorAll("[data-times]").forEach((el) => el.onchange = () => {
+    const i = +el.dataset.times; const v = Number(el.value);
+    if (v > 0) { state.items[i] = { ...state.items[i], actual_servings_per_day: v, servings: 1 }; recheck(); } });
+  $("combo").querySelectorAll("[data-del]").forEach((b) => b.onclick = () => { state.items.splice(+b.dataset.del, 1); recheck(); });
+  $("combo").querySelectorAll("[data-lock]").forEach((b) => b.onclick = () => { const i = +b.dataset.lock; state.items[i] = { ...state.items[i], locked: !state.items[i].locked }; recheck(); });
+  $("combo").querySelectorAll("[data-alt]").forEach((s) => s.onchange = () => { if (s.value) { state.items[+s.dataset.alt] = { product_id: s.value }; recheck(); } });
+
+  renderAI();
+
+  // 자동 수정안
+  if (revision && (revision.steps.length || revision.note)) {
+    $("revision-card").classList.remove("hidden");
+    $("revision").innerHTML = (revision.steps.length ? revision.steps.map((st) =>
+      `<div class="step"><b>${st.order}.</b> ${esc(st.suggestion.description)}</div>`).join("") : "")
+      + `<p class="muted">적용 전: ${esc(revision.before.overall_label)} → 적용 후: <b>${esc(revision.after.overall_label)}</b></p>`
+      + (revision.remaining_findings.length ? `<p class="muted">남는 항목: ${revision.remaining_findings.map(esc).join(", ")}</p>` : "")
+      + (revision.note ? `<p class="muted">${esc(revision.note)}</p>` : "")
+      + (revision.applied ? `<button class="primary" id="apply-rev">수정안 모두 적용하고 재점검</button>` : "");
+    if (revision.applied) $("apply-rev").onclick = () => { state.items = revision.items; recheck(); };
+  } else $("revision-card").classList.add("hidden");
+
+  // 점검 결과
+  $("findings").innerHTML = report.findings.length ? report.findings.map((f, fi) => `
+    <div class="finding f-${f.severity}">
+      <div class="f-title"><span class="sev sev-${f.severity}">${esc(f.severity_label)}</span><span class="muted">${esc(f.category_label)}</span> ${esc(f.title)}</div>
+      <div class="f-msg">${esc(f.message)}</div>
+      ${f.guidance ? `<div class="f-guide">${esc(f.guidance)}</div>` : ""}
+      ${f.evidence.length ? `<details><summary>근거 ${f.evidence.length}건</summary><ul>${f.evidence.map((e) => `<li><b>${esc(e.source)}</b> — ${esc(e.detail)}</li>`).join("")}</ul></details>` : ""}
+      ${f.suggestions.some((s) => s.description !== f.guidance) ? `<div style="margin-top:6px">${f.suggestions.filter((s) => s.description !== f.guidance).map((s) => { const si = f.suggestions.indexOf(s); return `
+        <div class="sugg"><div>${esc(s.description)}${s.introduces.length ? `<div class="new-issue">새로 생기는 항목: ${s.introduces.map(esc).join(", ")}</div>` : ""}</div>
+        ${["remove", "replace", "add", "reduce"].includes(s.action) ? `<button class="small brand" data-f="${fi}" data-s="${si}">적용</button>` : ""}</div>`; }).join("")}</div>` : ""}
+    </div>`).join("") : `<p class="muted">점검 항목이 없어요.</p>`;
+  $("findings").querySelectorAll("[data-f]").forEach((b) => b.onclick = () => applySuggestion(report.findings[+b.dataset.f].suggestions[+b.dataset.s]));
+
+  // 성분 분포
+  $("dist").innerHTML = report.distribution.map((d) => {
+    const ref = d.reference;
+    const upper = ref.ul ?? ref.max;
+    const lower = ref.value ?? ref.min;
+    let width, mark = null, right;
+    if (upper) {
+      width = Math.min(100, (d.total / upper) * 100);
+      if (lower) mark = Math.min(100, (lower / upper) * 100);
+      right = `${d.status_label} · ${ref.ul ? "상한" : "최대"} 대비 ${Math.round(d.percent_of_upper)}%`;
+    } else if (lower) {
+      width = Math.min(100, (d.total / lower) * 50); mark = 50;
+      right = `${d.status_label} · ${ref.label} 대비 ${Math.round(d.percent_of_reference)}%`;
+    } else { width = 0; right = d.status_label; }
+    const total = d.total >= 100 ? Math.round(d.total).toLocaleString("ko-KR") : +d.total.toFixed(2);
+    const iu = d.total_iu ? ` <span class="muted">(${Math.round(d.total_iu).toLocaleString("ko-KR")}IU)</span>` : "";
+    return `<div class="dist"><div class="dist-top"><span>${esc(d.name)} <b>${total}${esc(d.unit)}</b>${iu}${d.is_duplicate ? ' <span class="badge b-ext">중복</span>' : ""}</span><span>${esc(right)}</span></div>
+      <div class="bar st-${d.status}"><i style="width:${width}%"></i>${mark !== null ? `<span class="mark" style="left:${mark}%"></span>` : ""}</div>
+      <details><summary>제품별 하루 섭취량 환산</summary><ul>${d.sources.map((s) => `<li>${esc(s.product_name)}: ${esc(s.calculation)}</li>`).join("")}</ul></details></div>`;
+  }).join("");
+
+  // 시간표
+  $("schedule").innerHTML = report.schedule.slots.map((s) => `<div class="slot"><b>${esc(s.label)}</b><span>${s.product_names.map(esc).join(", ")}</span></div>`).join("")
+    + `<ul class="plain" style="margin-top:6px">${report.schedule.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>`;
+
+  // 참고
+  const drugs = report.recognized_drugs.map((d) => d.name ? `${esc(d.input)} → ${esc(d.name)} (${esc(d.class_name)})` : `${esc(d.input)} → 인식하지 못함`);
+  $("notes").innerHTML =
+    (drugs.length ? `<p class="muted" style="margin:0 0 6px">인식한 약: ${drugs.join(" · ")}</p>` : "")
+    + (state.notes.length ? `<ul class="plain">${state.notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : "")
+    + (state.excluded.length ? `<p class="muted" style="margin:8px 0 4px"><b>추천에서 제외한 제품</b></p><ul class="plain">${state.excluded.map((e) => `<li>${esc(e.name)}: ${esc(e.reason)}</li>`).join("")}</ul>` : "")
+    + `<p class="muted" style="margin:8px 0 4px"><b>안내</b></p><ul class="plain">${report.disclaimers.map((d) => `<li>${esc(d)}</li>`).join("")}</ul>`;
+}
+
+async function init() {
+  const [goals, goalsExt, family, products] = await Promise.all([api("/v1/catalog/goals?tier=core"),
+    api("/v1/catalog/goals?tier=extended"), api("/v1/catalog/family-history"), api("/v1/catalog/products")]);
+  state.products = products;
+  const draw = () => { chipGroup($("goals"), goals, state.goals, true, draw); chipGroup($("goals-ext"), goalsExt, state.goals, true, draw);
+    chipGroup($("family"), family, state.family, false, draw); };
+  draw();
+  $("sex").querySelectorAll(".chip").forEach((b) => b.onclick = () => {
+    state.sex = b.dataset.v; $("sex").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", x === b)); });
+  const opt = (p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`;
+  const optgroupPilot = products.filter((p) => p.sold_on_platform && p.data_status !== "sample");
+  $("current-select").innerHTML = `<optgroup label="타사 제품 예시">${products.filter((p) => !p.sold_on_platform).map(opt).join("")}</optgroup>`
+    + `<optgroup label="WelLink 제품">${products.filter((p) => p.sold_on_platform).map(opt).join("")}</optgroup>`;
+  $("add-select").innerHTML = products.filter((p) => p.sold_on_platform).map(opt).join("");
+  $("pick-select").innerHTML = `<optgroup label="실증 후보 제품">${optgroupPilot.map(opt).join("")}</optgroup>`
+    + `<optgroup label="가상 샘플 제품">${products.filter((p) => p.sold_on_platform && p.data_status === "sample").map(opt).join("")}</optgroup>`;
+  state.current = [{ product_id: "ext_multi" }, { product_id: "ext_calmagd" }];
+  renderCurrent(); renderPicked();
+  $("pick-add").onclick = () => { state.picked.push({ product_id: $("pick-select").value }); renderPicked(); };
+  $("run-check").onclick = runCheck;
+  const loadPersona = (id) => {
+    if (id !== "A") return;
+    $("age").value = 34; state.sex = "male";
+    $("sex").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", x.dataset.v === "male"));
+    state.goals.splice(0, state.goals.length, "basic_health", "liver");
+    state.family.splice(0, state.family.length, "hypertension");
+    $("meds").value = "알레그라"; $("allergies").value = ""; $("smoker").checked = false; $("preg").checked = false;
+    state.picked = [{ product_id: "pl_denps_probiotics" }, { product_id: "pl_ckd_calmag_dzinc" }, { product_id: "pl_dw_enerthistle_choledown_plus" }];
+    state.current = [];
+    draw(); renderPicked(); renderCurrent();
+  };
+  $("persona").onchange = () => loadPersona($("persona").value);
+  const qp = new URLSearchParams(location.search).get("persona");
+  if (qp) { $("persona").value = qp; loadPersona(qp); runCheck(); }
+  $("current-add").onclick = () => { state.current.push({ product_id: $("current-select").value }); renderCurrent(); };
+  $("custom-add").onclick = () => {
+    try {
+      const name = $("custom-name").value.trim(); if (!name) throw new Error("제품명을 입력하세요");
+      state.current.push({ name, ingredients: parseCustom(), amount_basis: $("custom-basis").value,
+        servings_per_day: Number($("custom-times").value) || 1 }); renderCurrent();
+      $("custom-name").value = ""; $("custom-ings").value = "";
+    } catch (e) { alert(e.message); }
+  };
+  $("add-btn").onclick = () => { state.items.push({ product_id: $("add-select").value }); recheck(); };
+  $("run").onclick = runRecommend;
+}
+init();
+</script>
+</body>
+</html>

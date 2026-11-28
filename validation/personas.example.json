@@ -1,0 +1,228 @@
+{
+  "notes": "P파트 대표 고객 장면을 바탕으로 한 예시 페르소나. 시판 제품을 등록한 뒤 current_products의 product_id를 실제 제품 ID로 바꾸고 expect를 조정해 쓰세요.",
+  "personas": [
+    {
+      "name": "직장인 A (30대 남성, 오피스 통근)",
+      "description": "종합비타민과 칼슘·마그네슘·비타민D 복합제를 함께 먹지만 비타민D가 겹치는지 모름. 아스피린 복용.",
+      "profile": {
+        "age": 34,
+        "sex": "male",
+        "goals": [
+          "cardio",
+          "fatigue"
+        ],
+        "medications": [
+          "아스피린"
+        ]
+      },
+      "current_products": [
+        {
+          "product_id": "ext_multi"
+        },
+        {
+          "product_id": "ext_calmagd"
+        },
+        {
+          "product_id": "ext_vitd5000"
+        }
+      ],
+      "expect": {
+        "findings_include": [
+          {
+            "type": "excess",
+            "ingredient": "vitamin_d"
+          },
+          {
+            "type": "excess",
+            "ingredient": "magnesium"
+          }
+        ],
+        "recommend_excludes": [
+          "wl_omega3",
+          "wl_ginkgo"
+        ],
+        "excluded_with_reason": [
+          "wl_omega3"
+        ],
+        "max_recommended": 2
+      }
+    },
+    {
+      "name": "대학생 B (20대 여성, 기숙사)",
+      "description": "시험 기간 피로 관리를 위해 제품을 사고 싶지만 무엇을 골라야 할지 모르고 가격이 부담됨.",
+      "profile": {
+        "age": 22,
+        "sex": "female",
+        "goals": [
+          "fatigue",
+          "immunity"
+        ]
+      },
+      "options": {
+        "budget_per_day": 1000
+      },
+      "expect": {
+        "all_goals_covered": true,
+        "max_recommended": 2,
+        "overall_in": [
+          "ok",
+          "review"
+        ]
+      }
+    },
+    {
+      "name": "부모님 (60대 후반 여성, 여러 약 복용)",
+      "description": "와파린·갑상선호르몬제·메트포르민 복용. 골다공증 가족력. 눈 건강과 뼈 건강에 관심.",
+      "profile": {
+        "age": 68,
+        "sex": "female",
+        "goals": [
+          "eye",
+          "bone"
+        ],
+        "family_history": [
+          "osteoporosis"
+        ],
+        "medications": [
+          "와파린",
+          "씬지로이드",
+          "메트포르민"
+        ]
+      },
+      "expect": {
+        "recommend_excludes": [
+          "wl_multi",
+          "wl_omega3",
+          "wl_lutein_omega3",
+          "wl_ginkgo"
+        ],
+        "excluded_with_reason": [
+          "wl_multi"
+        ],
+        "findings_include": [
+          {
+            "type": "drug_timing",
+            "title_contains": "레보티록신"
+          },
+          {
+            "type": "nutrient_low",
+            "ingredient": "vitamin_b12"
+          }
+        ],
+        "findings_exclude": [
+          {
+            "type": "drug_interaction"
+          }
+        ]
+      }
+    },
+    {
+      "name": "직장인 C (40대, 직접 고른 조합 점검)",
+      "description": "스타틴 복용 중인데 콜레스테롤 관리용으로 홍국을 직접 골랐고, 해외직구 비타민D(1회 2,500IU, 1일 2회)를 먹음.",
+      "mode": "check",
+      "profile": {
+        "age": 45,
+        "sex": "male",
+        "goals": [
+          "cardio"
+        ],
+        "medications": [
+          "로수바스타틴"
+        ]
+      },
+      "current_products": [
+        {
+          "product_id": "wl_redyeast"
+        },
+        {
+          "name": "해외직구 비타민D",
+          "amount_basis": "per_serving",
+          "servings_per_day": 2,
+          "ingredients": [
+            {
+              "name": "Vitamin D3",
+              "amount": 2500,
+              "unit": "IU"
+            }
+          ]
+        }
+      ],
+      "expect": {
+        "findings_include": [
+          {
+            "type": "drug_interaction",
+            "ingredient": "red_yeast_rice",
+            "severity": "avoid"
+          },
+          {
+            "type": "excess",
+            "ingredient": "vitamin_d"
+          }
+        ],
+        "ingredient_total": {
+          "vitamin_d": {
+            "min": 125,
+            "max": 125
+          }
+        },
+        "overall_in": [
+          "avoid"
+        ]
+      }
+    },
+    {
+      "name": "사용자 A (34세 남성 직장인, 고혈압 가족력, 알레그라 복용)",
+      "description": "기본 건강관리와 간 건강을 위해 실증 후보 제품 3종(유산균, 칼슘·마그네슘·비타민D·아연, 밀크씨슬·홍국 복합)을 직접 고름.",
+      "mode": "check",
+      "profile": {
+        "age": 34,
+        "sex": "male",
+        "goals": [
+          "basic_health",
+          "liver"
+        ],
+        "family_history": [
+          "hypertension"
+        ],
+        "medications": [
+          "알레그라"
+        ]
+      },
+      "current_products": [
+        {
+          "product_id": "pl_denps_probiotics"
+        },
+        {
+          "product_id": "pl_ckd_calmag_dzinc"
+        },
+        {
+          "product_id": "pl_dw_enerthistle_choledown_plus"
+        }
+      ],
+      "expect": {
+        "findings_include": [
+          {
+            "type": "drug_timing",
+            "title_contains": "펙소페나딘"
+          },
+          {
+            "type": "duplicate",
+            "ingredient": "zinc"
+          },
+          {
+            "type": "estimated_data"
+          }
+        ],
+        "findings_exclude": [
+          {
+            "type": "drug_interaction"
+          },
+          {
+            "type": "excess"
+          }
+        ],
+        "all_goals_covered": true
+      }
+    }
+  ]
+}

@@ -1,0 +1,307 @@
+{
+  "version": "2026.11-seed",
+  "review_required": true,
+  "notes": "시드 데이터. 기능성 문구·고시형 원료 일일섭취량·영양성분 기준치(nrv)는 식약처 「건강기능식품의 기준 및 규격」, 「식품등의 표시기준」 원문과 대조해 검수한 뒤 사용하세요. unit은 계산용 기준 단위, unit_label은 화면 표시용입니다. iu_factor는 1 IU당 기준 단위 환산값입니다.",
+  "ingredients": [
+    {
+      "id": "vitamin_a", "name": "비타민A", "category": "nutrient", "unit": "μg", "unit_label": "μg RAE",
+      "aliases": ["비타민a", "vitamin a", "레티놀", "retinol", "레티닐팔미테이트", "retinyl palmitate", "레티닐아세테이트", "retinyl acetate"],
+      "nrv": 700, "iu_factor": 0.3,
+      "claims": [
+        {"text": "어두운 곳에서 시각 적응을 위해 필요", "tags": {"eye": 0.4}},
+        {"text": "피부와 점막을 형성하고 기능을 유지하는데 필요", "tags": {"skin": 0.6}},
+        {"text": "상피세포의 성장과 발달에 필요", "tags": {}}
+      ],
+      "notes": "상한섭취량은 레티놀(preformed vitamin A) 기준이며 베타카로틴은 포함하지 않습니다. IU 입력은 레티놀 기준(1 IU = 0.3 μg RAE)으로 환산합니다."
+    },
+    {
+      "id": "beta_carotene", "name": "베타카로틴", "category": "nutrient", "unit": "mg", "unit_label": "mg",
+      "aliases": ["베타카로틴", "beta carotene", "beta-carotene", "β-카로틴", "β-carotene"],
+      "claims": [],
+      "notes": "비타민A 전구체. 비타민A 상한섭취량 계산에는 포함하지 않습니다."
+    },
+    {
+      "id": "vitamin_d", "name": "비타민D", "category": "nutrient", "unit": "μg", "unit_label": "μg",
+      "aliases": ["비타민d", "vitamin d", "비타민d3", "vitamin d3", "비타민d2", "콜레칼시페롤", "cholecalciferol", "에르고칼시페롤", "ergocalciferol"],
+      "nrv": 10, "iu_factor": 0.025,
+      "claims": [
+        {"text": "칼슘과 인이 흡수되고 이용되는데 필요", "tags": {"bone": 0.5}},
+        {"text": "뼈의 형성과 유지에 필요", "tags": {"bone": 0.6}}
+      ]
+    },
+    {
+      "id": "vitamin_e", "name": "비타민E", "category": "nutrient", "unit": "mg", "unit_label": "mg α-TE",
+      "aliases": ["비타민e", "vitamin e", "토코페롤", "tocopherol", "d-알파토코페롤", "d-alpha tocopherol", "dl-알파토코페릴아세테이트"],
+      "nrv": 11, "iu_factor": 0.67,
+      "claims": [
+        {"text": "유해산소로부터 세포를 보호하는데 필요", "tags": {"antioxidant": 1.0}}
+      ],
+      "notes": "IU 입력은 천연형(d-α-토코페롤, 1 IU = 0.67 mg) 기준으로 환산합니다. 합성형(dl-)은 1 IU = 0.45 mg입니다."
+    },
+    {
+      "id": "vitamin_k", "name": "비타민K", "category": "nutrient", "unit": "μg", "unit_label": "μg",
+      "aliases": ["비타민k", "vitamin k", "비타민k1", "비타민k2", "vitamin k2", "필로퀴논", "phylloquinone", "메나퀴논", "menaquinone", "mk-7"],
+      "nrv": 70,
+      "claims": [
+        {"text": "정상적인 혈액응고에 필요", "tags": {}},
+        {"text": "뼈의 구성에 필요", "tags": {"bone": 0.5}}
+      ]
+    },
+    {
+      "id": "vitamin_c", "name": "비타민C", "category": "nutrient", "unit": "mg", "unit_label": "mg",
+      "aliases": ["비타민c", "vitamin c", "아스코르브산", "ascorbic acid", "l-아스코르브산"],
+      "nrv": 100,
+      "claims": [
+        {"text": "결합조직 형성과 기능유지에 필요", "tags": {"skin": 0.5}},
+        {"text": "철의 흡수에 필요", "tags": {}},
+        {"text": "유해산소로부터 세포를 보호하는데 필요", "tags": {"antioxidant": 1.0}}
+      ]
+    },
+    {
+      "id": "thiamin", "name": "비타민B1", "category": "nutrient", "unit": "mg", "unit_label": "mg",
+      "aliases": ["비타민b1", "vitamin b1", "티아민", "thiamin", "thiamine", "벤포티아민", "benfotiamine", "티아민질산염"],
+      "nrv": 1.2,
+      "claims": [{"text": "탄수화물과 에너지 대사에 필요", "tags": {"energy_metabolism": 1.0}}]
+    },
+    {
+      "id": "riboflavin", "name": "비타민B2", "category": "nutrient", "unit": "mg", "unit_label": "mg",
+      "aliases": ["비타민b2", "vitamin b2", "리보플라빈", "riboflavin"],
+      "nrv": 1.4,
+      "claims": [{"text": "체내 에너지 생성에 필요", "tags": {"energy_metabolism": 1.0}}]
+    },
+    {
+      "id": "niacin", "name": "나이아신", "category": "nutrient", "unit": "mg", "unit_label": "mg NE",
+      "aliases": ["나이아신", "niacin", "비타민b3", "vitamin b3", "니코틴산", "nicotinic acid"],
+      "nrv": 15,
+      "claims": [{"text": "체내 에너지 생성에 필요", "tags": {"energy_metabolism": 1.0}}],
+      "notes": "형태 구분이 없으면 니코틴산 기준 상한(35mg)으로 보수적으로 판단합니다. 원재료가 니코틴산아마이드라면 상한은 1,000mg입니다."
+    },
+    {
+      "id": "nicotinamide", "name": "니코틴산아마이드", "category": "nutrient", "unit": "mg", "unit_label": "mg",
+      "aliases": ["니코틴산아마이드", "니코틴아마이드", "nicotinamide", "niacinamide", "나이아신아마이드"],
+      "claims": [{"text": "체내 에너지 생성에 필요", "tags": {"energy_metabolism": 1.0}}],
+      "nrv": 15,
+      "notes": "나이아신의 한 형태. 상한섭취량은 1,000mg입니다."
+    },
+    {
+      "id": "vitamin_b6", "name": "비타민B6", "category": "nutrient", "unit": "mg", "unit_label": "mg",
+      "aliases": ["비타민b6", "vitamin b6", "피리독신", "pyridoxine", "염산피리독신", "피리독살포스페이트", "p5p"],
+      "nrv": 1.5,
+      "claims": [
+        {"text": "단백질 및 아미노산 이용에 필요", "tags": {"energy_metabolism": 0.5}},
+        {"text": "혈액의 호모시스테인 수준을 정상으로 유지하는데 필요", "tags": {}}
+      ]
+    },
+    {
+      "id": "folate", "name": "엽산", "category": "nutrient", "unit": "μg", "unit_label": "μg",
+      "aliases": ["엽산", "folate", "folic acid", "폴산", "비타민b9", "vitamin b9", "메틸엽산", "5-mthf"],
+      "nrv": 400,
+      "claims": [
+        {"text": "세포와 혈액생성에 필요", "tags": {"blood_formation": 1.0}},
+        {"text": "태아 신경관의 정상 발달에 필요", "tags": {}},
+        {"text": "혈액의 호모시스테인 수준을 정상으로 유지하는데 필요", "tags": {}}
+      ],
+      "notes": "상한섭취량(1,000μg)은 보충제·강화식품의 엽산(folic acid)에 적용합니다. 표시 단위(μg, μg DFE) 차이는 검수 시 확인하세요."
+    },
+    {
+      "id": "vitamin_b12", "name": "비타민B12", "category": "nutrient", "unit": "μg", "unit_label": "μg",
+      "aliases": ["비타민b12", "vitamin b12", "코발라민", "cobalamin", "시아노코발라민", "cyanocobalamin", "메코발라민", "메틸코발라민", "methylcobalamin"],
+      "nrv": 2.4,
+      "claims": [{"text": "정상적인 엽산 대사에 필요", "tags": {"blood_formation": 0.5}}]
+    },
+    {
+      "id": "biotin", "name": "비오틴", "category": "nutrient", "unit": "μg", "unit_label": "μg",
+      "aliases": ["비오틴", "biotin", "비타민b7", "vitamin b7"],
+      "nrv": 30,
+      "claims": [{"text": "지방, 탄수화물, 단백질 대사와 에너지 생성에 필요", "tags": {"energy_metabolism": 1.0}}]
+    },
+    {
+      "id": "pantothenic_acid", "name": "판토텐산", "category": "nutrient", "unit": "mg", "unit_label": "mg",
+      "aliases": ["판토텐산", "pantothenic acid", "비타민b5", "vitamin b5", "판토텐산칼슘", "calcium pantothenate"],
+      "nrv": 5,
+      "claims": [{"text": "지방, 탄수화물, 단백질 대사와 에너지 생성에 필요", "tags": {"energy_metabolism": 1.0}}]
+    },
+    {
+      "id": "calcium", "name": "칼슘", "category": "nutrient", "unit": "mg", "unit_label": "mg",
+      "aliases": ["칼슘", "calcium", "ca", "탄산칼슘", "구연산칼슘", "calcium carbonate", "calcium citrate"],
+      "nrv": 700,
+      "claims": [
+        {"text": "뼈와 치아 형성에 필요", "tags": {"bone": 1.0}},
+        {"text": "신경과 근육 기능 유지에 필요", "tags": {}},
+        {"text": "정상적인 혈액응고에 필요", "tags": {}}
+      ]
+    },
+    {
+      "id": "magnesium", "name": "마그네슘", "category": "nutrient", "unit": "mg", "unit_label": "mg",
+      "aliases": ["마그네슘", "magnesium", "mg", "산화마그네슘", "magnesium oxide", "글루콘산마그네슘"],
+      "nrv": 315,
+      "claims": [
+        {"text": "에너지 이용에 필요", "tags": {"energy_metabolism": 0.8}},
+        {"text": "신경과 근육 기능 유지에 필요", "tags": {}}
+      ],
+      "notes": "마그네슘 상한섭취량(350mg)은 식품 외 급원(보충제 등)에만 적용합니다."
+    },
+    {
+      "id": "iron", "name": "철", "category": "nutrient", "unit": "mg", "unit_label": "mg",
+      "aliases": ["철", "철분", "iron", "fe", "푸마르산제일철", "ferrous fumarate", "헴철", "heme iron", "비스글리시네이트철"],
+      "nrv": 12,
+      "claims": [
+        {"text": "체내 산소운반과 혈액생성에 필요", "tags": {"blood_formation": 1.0}},
+        {"text": "에너지 생성에 필요", "tags": {"energy_metabolism": 0.6}}
+      ]
+    },
+    {
+      "id": "zinc", "name": "아연", "category": "nutrient", "unit": "mg", "unit_label": "mg",
+      "aliases": ["아연", "zinc", "zn", "산화아연", "글루콘산아연", "zinc gluconate"],
+      "nrv": 8.5,
+      "claims": [
+        {"text": "정상적인 면역기능에 필요", "tags": {"immune": 1.0}},
+        {"text": "정상적인 세포분열에 필요", "tags": {}}
+      ]
+    },
+    {
+      "id": "copper", "name": "구리", "category": "nutrient", "unit": "μg", "unit_label": "μg",
+      "aliases": ["구리", "copper", "cu", "황산구리", "글루콘산구리"],
+      "nrv": 800,
+      "claims": [
+        {"text": "철의 운반과 이용에 필요", "tags": {}},
+        {"text": "유해산소로부터 세포를 보호하는데 필요", "tags": {"antioxidant": 0.8}}
+      ]
+    },
+    {
+      "id": "selenium", "name": "셀레늄", "category": "nutrient", "unit": "μg", "unit_label": "μg",
+      "aliases": ["셀레늄", "셀렌", "selenium", "se", "셀레늄함유효모"],
+      "nrv": 55,
+      "claims": [{"text": "유해산소로부터 세포를 보호하는데 필요", "tags": {"antioxidant": 1.0}}]
+    },
+    {
+      "id": "iodine", "name": "요오드", "category": "nutrient", "unit": "μg", "unit_label": "μg",
+      "aliases": ["요오드", "아이오딘", "iodine", "요오드칼륨"],
+      "nrv": 150,
+      "claims": [
+        {"text": "갑상선 호르몬의 합성에 필요", "tags": {}},
+        {"text": "에너지 생성에 필요", "tags": {"energy_metabolism": 0.5}}
+      ]
+    },
+    {
+      "id": "manganese", "name": "망간", "category": "nutrient", "unit": "mg", "unit_label": "mg",
+      "aliases": ["망간", "manganese", "mn", "황산망간"],
+      "nrv": 3.0,
+      "claims": [
+        {"text": "뼈 형성에 필요", "tags": {"bone": 0.4}},
+        {"text": "에너지 이용에 필요", "tags": {"energy_metabolism": 0.5}},
+        {"text": "유해산소로부터 세포를 보호하는데 필요", "tags": {"antioxidant": 0.8}}
+      ]
+    },
+    {
+      "id": "chromium", "name": "크롬", "category": "nutrient", "unit": "μg", "unit_label": "μg",
+      "aliases": ["크롬", "chromium", "cr", "피콜린산크롬", "chromium picolinate"],
+      "nrv": 30,
+      "claims": [{"text": "체내 탄수화물, 지방, 단백질 대사에 관여", "tags": {"energy_metabolism": 0.5}}]
+    },
+    {
+      "id": "epa_dha", "name": "EPA·DHA", "category": "functional", "unit": "mg", "unit_label": "mg (EPA와 DHA의 합)",
+      "aliases": ["epa및dha", "epa및dha의합", "epa+dha", "epa dha", "epa·dha", "오메가3", "오메가-3", "omega3", "omega-3", "epa및dha함유유지"],
+      "functional_range": {"min": 500, "max": 2000},
+      "claims": [
+        {"text": "혈중 중성지질 개선·혈행 개선에 도움을 줄 수 있음", "tags": {"blood_lipid": 1.0, "circulation": 1.0}},
+        {"text": "건조한 눈을 개선하여 눈 건강에 도움을 줄 수 있음", "tags": {"eye": 0.5}}
+      ],
+      "excess_severity": "caution"
+    },
+    {
+      "id": "probiotics", "name": "프로바이오틱스", "category": "functional", "unit": "억CFU", "unit_label": "억 CFU",
+      "aliases": ["프로바이오틱스", "probiotics", "유산균", "락토바실러스", "비피도박테리움"],
+      "functional_range": {"min": 1, "max": 100},
+      "claims": [{"text": "유산균 증식 및 유해균 억제·배변활동 원활에 도움을 줄 수 있음", "tags": {"gut": 1.0}}],
+      "excess_severity": "caution"
+    },
+    {
+      "id": "lutein", "name": "루테인", "category": "functional", "unit": "mg", "unit_label": "mg",
+      "aliases": ["루테인", "lutein", "마리골드꽃추출물", "마리골드꽃추출물(루테인)"],
+      "functional_range": {"min": 10, "max": 20},
+      "claims": [{"text": "노화로 인해 감소될 수 있는 황반색소밀도를 유지하여 눈 건강에 도움을 줄 수 있음", "tags": {"eye": 1.0}}],
+      "excess_severity": "caution"
+    },
+    {
+      "id": "red_ginseng", "name": "홍삼(진세노사이드)", "category": "functional", "unit": "mg", "unit_label": "mg (진세노사이드 Rg1+Rb1+Rg3)",
+      "aliases": ["홍삼", "red ginseng", "진세노사이드", "ginsenoside", "홍삼농축액", "홍삼추출물"],
+      "functional_range": {"min": 2.4, "max": 80},
+      "claims": [
+        {"text": "면역력 증진에 도움을 줄 수 있음", "tags": {"immune": 1.0}},
+        {"text": "피로개선에 도움을 줄 수 있음", "tags": {"fatigue": 1.0}},
+        {"text": "혈소판 응집억제를 통한 혈액흐름에 도움을 줄 수 있음", "tags": {"circulation": 0.5}},
+        {"text": "기억력 개선에 도움을 줄 수 있음", "tags": {"memory": 0.5}}
+      ],
+      "excess_severity": "caution"
+    },
+    {
+      "id": "milk_thistle", "name": "밀크씨슬(실리마린)", "category": "functional", "unit": "mg", "unit_label": "mg (실리마린)",
+      "aliases": ["밀크씨슬", "밀크시슬", "milk thistle", "실리마린", "silymarin", "밀크씨슬추출물"],
+      "functional_range": {"min": 130, "max": 130},
+      "claims": [{"text": "간 건강에 도움을 줄 수 있음", "tags": {"liver": 1.0}}],
+      "excess_severity": "caution"
+    },
+    {
+      "id": "coq10", "name": "코엔자임Q10", "category": "functional", "unit": "mg", "unit_label": "mg",
+      "aliases": ["코엔자임q10", "coenzyme q10", "coq10", "코큐텐", "유비퀴논", "ubiquinone", "유비퀴놀"],
+      "functional_range": {"min": 90, "max": 100},
+      "claims": [
+        {"text": "항산화에 도움을 줄 수 있음", "tags": {"antioxidant": 1.0}},
+        {"text": "높은 혈압 감소에 도움을 줄 수 있음", "tags": {"blood_pressure": 1.0}}
+      ],
+      "excess_severity": "caution"
+    },
+    {
+      "id": "ginkgo", "name": "은행잎추출물", "category": "functional", "unit": "mg", "unit_label": "mg (추출물)",
+      "aliases": ["은행잎추출물", "은행잎", "ginkgo", "ginkgo biloba", "징코"],
+      "claims": [
+        {"text": "혈행 개선에 도움을 줄 수 있음", "tags": {"circulation": 1.0}},
+        {"text": "기억력 개선에 도움을 줄 수 있음", "tags": {"memory": 1.0}}
+      ],
+      "notes": "고시 일일섭취량은 지표성분(플라보노이드 배당체·테르펜락톤) 기준이라 추출물 함량만으로는 판단하지 않습니다. 검수 시 지표성분 기준으로 보완하세요."
+    },
+    {
+      "id": "red_yeast_rice", "name": "홍국(모나콜린K)", "category": "functional", "unit": "mg", "unit_label": "mg (모나콜린K)",
+      "aliases": ["홍국", "red yeast rice", "모나콜린k", "monacolin k", "홍국쌀"],
+      "functional_range": {"min": 4, "max": 8},
+      "claims": [{"text": "혈중 콜레스테롤 개선에 도움을 줄 수 있음", "tags": {"blood_lipid": 1.0}}],
+      "excess_severity": "warning"
+    },
+    {
+      "id": "theanine", "name": "L-테아닌", "category": "functional", "unit": "mg", "unit_label": "mg",
+      "aliases": ["테아닌", "l-테아닌", "l-theanine", "theanine"],
+      "functional_range": {"min": 200, "max": 250},
+      "claims": [{"text": "스트레스로 인한 긴장완화에 도움을 줄 수 있음", "tags": {"stress": 1.0}}],
+      "excess_severity": "caution"
+    },
+    {
+      "id": "glucosamine", "name": "글루코사민", "category": "functional", "unit": "mg", "unit_label": "mg",
+      "aliases": ["글루코사민", "glucosamine", "글루코사민염산염", "글루코사민황산염"],
+      "functional_range": {"min": 1500, "max": 2000},
+      "claims": [{"text": "관절 및 연골 건강에 도움을 줄 수 있음", "tags": {"joint": 1.0}}],
+      "excess_severity": "caution"
+    },
+    {
+      "id": "msm", "name": "MSM(식이유황)", "category": "functional", "unit": "mg", "unit_label": "mg",
+      "aliases": ["msm", "식이유황", "엠에스엠", "메틸설포닐메탄", "methylsulfonylmethane"],
+      "functional_range": {"min": 1500, "max": 2000},
+      "claims": [{"text": "관절 및 연골 건강에 도움을 줄 수 있음", "tags": {"joint": 1.0}}],
+      "excess_severity": "caution"
+    },
+    {
+      "id": "garcinia", "name": "가르시니아(HCA)", "category": "functional", "unit": "mg", "unit_label": "mg (HCA)",
+      "aliases": ["가르시니아", "가르시니아캄보지아", "garcinia", "hca", "가르시니아캄보지아추출물"],
+      "functional_range": {"min": 750, "max": 2800},
+      "claims": [{"text": "탄수화물이 지방으로 합성되는 것을 억제하여 체지방 감소에 도움을 줄 수 있음", "tags": {"body_fat": 1.0}}],
+      "excess_severity": "warning"
+    },
+    {
+      "id": "banaba", "name": "바나바잎(코로솔산)", "category": "functional", "unit": "mg", "unit_label": "mg (코로솔산)",
+      "aliases": ["바나바", "바나바잎", "바나바잎추출물", "banaba", "코로솔산", "corosolic acid"],
+      "functional_range": {"min": 1.3, "max": 1.3},
+      "claims": [{"text": "식후 혈당상승 억제에 도움을 줄 수 있음", "tags": {"blood_sugar": 1.0}}],
+      "excess_severity": "caution"
+    }
+  ]
+}

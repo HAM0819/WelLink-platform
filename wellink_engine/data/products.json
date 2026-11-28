@@ -1,0 +1,244 @@
+{
+  "version": "2026.11-seed",
+  "review_required": true,
+  "notes": "모든 제품은 개발·시연용 가상 제품입니다. 실제 취급 제품의 표시사항으로 교체하세요. sold_on_platform=false인 제품은 사용자가 '현재 먹고 있는 제품'으로 등록하는 타사 제품 예시입니다. 함량은 표시사항 그대로 넣습니다: amount_basis(per_day=1일 섭취량당, per_serving=1회 섭취량당, 기본 per_day), servings_per_day(표시된 1일 섭취 횟수, 기본 1), 성분별 unit(IU·mg·μg·g·CFU 등, 생략하면 ingredients.json의 기준 단위). 엔진이 1일 기준·성분 기준 단위로 환산합니다. timing: morning/evening/any.",
+  "allergens": {
+    "crustacean": {"name": "갑각류(게·새우)", "aliases": ["갑각류", "게", "새우", "crustacean", "shellfish", "크릴"]},
+    "wheat": {"name": "밀", "aliases": ["밀", "밀가루", "wheat", "글루텐"]},
+    "milk": {"name": "우유", "aliases": ["우유", "유제품", "milk", "dairy", "유당"]},
+    "soy": {"name": "대두", "aliases": ["대두", "콩", "soy", "soybean"]},
+    "fish": {"name": "어류", "aliases": ["어류", "생선", "fish", "고등어", "멸치"]}
+  },
+  "products": [
+    {
+      "id": "wl_multi", "name": "WL 데일리 멀티비타민미네랄", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 450, "timing": "morning",
+      "ingredients": [
+        {"id": "vitamin_a", "amount": 350}, {"id": "vitamin_d", "amount": 10}, {"id": "vitamin_e", "amount": 11},
+        {"id": "vitamin_k", "amount": 35}, {"id": "vitamin_c", "amount": 100}, {"id": "thiamin", "amount": 1.2},
+        {"id": "riboflavin", "amount": 1.4}, {"id": "niacin", "amount": 15}, {"id": "vitamin_b6", "amount": 1.5},
+        {"id": "folate", "amount": 400}, {"id": "vitamin_b12", "amount": 2.4}, {"id": "biotin", "amount": 30},
+        {"id": "pantothenic_acid", "amount": 5}, {"id": "calcium", "amount": 210}, {"id": "magnesium", "amount": 100},
+        {"id": "zinc", "amount": 8.5}, {"id": "copper", "amount": 800}, {"id": "selenium", "amount": 55},
+        {"id": "manganese", "amount": 3}, {"id": "chromium", "amount": 30}
+      ],
+      "allergens": [],
+      "cautions": ["특정질환, 특이체질, 알레르기 체질이거나 임산부·수유부는 섭취 전 전문가와 상담하세요."]
+    },
+    {
+      "id": "wl_multi_basic", "name": "WL 베이직 멀티비타민 (비타민K·미네랄 무첨가)", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 350, "timing": "morning",
+      "ingredients": [
+        {"id": "vitamin_a", "amount": 300}, {"id": "vitamin_d", "amount": 5}, {"id": "vitamin_e", "amount": 6},
+        {"id": "vitamin_c", "amount": 100}, {"id": "thiamin", "amount": 1.2}, {"id": "riboflavin", "amount": 1.4},
+        {"id": "niacin", "amount": 15}, {"id": "vitamin_b6", "amount": 1.5}, {"id": "folate", "amount": 200},
+        {"id": "vitamin_b12", "amount": 2.4}, {"id": "biotin", "amount": 30}, {"id": "pantothenic_acid", "amount": 5}
+      ],
+      "allergens": [],
+      "cautions": ["특정질환, 특이체질, 알레르기 체질이거나 임산부·수유부는 섭취 전 전문가와 상담하세요."]
+    },
+    {
+      "id": "wl_calmagd", "name": "WL 칼슘·마그네슘·비타민D", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 2회, 1회 1정",
+      "amount_basis": "per_serving", "servings_per_day": 2, "price_per_day": 400, "timing": "evening",
+      "ingredients": [{"id": "calcium", "amount": 300, "unit": "mg"}, {"id": "magnesium", "amount": 125, "unit": "mg"}, {"id": "vitamin_d", "amount": 200, "unit": "IU"}],
+      "allergens": [],
+      "cautions": ["칼슘 섭취 시 철분제와는 시간 간격을 두고 섭취하세요."]
+    },
+    {
+      "id": "wl_vitd", "name": "WL 비타민D 1000IU", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "연질캡슐", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1캡슐", "price_per_day": 200, "timing": "any",
+      "ingredients": [{"id": "vitamin_d", "amount": 1000, "unit": "IU"}],
+      "allergens": [],
+      "cautions": []
+    },
+    {
+      "id": "wl_omega3", "name": "WL rTG 오메가3", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "연질캡슐", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1캡슐", "price_per_day": 550, "timing": "any",
+      "ingredients": [{"id": "epa_dha", "amount": 600}, {"id": "vitamin_e", "amount": 5}],
+      "allergens": ["fish"],
+      "cautions": ["의약품(항응고제·항혈소판제) 복용 시 섭취에 주의하세요.", "개인에 따라 피부 관련 이상반응이 발생할 수 있습니다."]
+    },
+    {
+      "id": "wl_lutein_omega3", "name": "WL 루테인 오메가3", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "연질캡슐", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 2캡슐", "price_per_day": 900, "timing": "any",
+      "ingredients": [{"id": "lutein", "amount": 10}, {"id": "epa_dha", "amount": 500}],
+      "allergens": ["fish"],
+      "cautions": ["의약품(항응고제·항혈소판제) 복용 시 섭취에 주의하세요.", "흡연자는 섭취에 주의하세요."]
+    },
+    {
+      "id": "wl_lutein", "name": "WL 루테인 20", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "연질캡슐", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1캡슐", "price_per_day": 450, "timing": "any",
+      "ingredients": [{"id": "lutein", "amount": 20}],
+      "allergens": [],
+      "cautions": ["흡연자는 섭취에 주의하세요."]
+    },
+    {
+      "id": "wl_redginseng", "name": "WL 홍삼 스틱", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "액상 스틱", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1포", "price_per_day": 1500, "timing": "morning",
+      "ingredients": [{"id": "red_ginseng", "amount": 12}],
+      "allergens": [],
+      "cautions": ["의약품(당뇨치료제, 혈액항응고제) 복용 시 섭취에 주의하세요."]
+    },
+    {
+      "id": "wl_probiotics", "name": "WL 프로바이오틱스 100억", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "분말 스틱", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1포", "price_per_day": 700, "timing": "morning",
+      "ingredients": [{"id": "probiotics", "amount": 100}],
+      "allergens": ["milk"],
+      "cautions": ["질환이 있거나 의약품 복용 시 전문가와 상담하세요.", "알레르기 체질은 개인에 따라 이상반응이 나타날 수 있습니다."]
+    },
+    {
+      "id": "wl_milkthistle", "name": "WL 밀크씨슬", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 400, "timing": "any",
+      "ingredients": [{"id": "milk_thistle", "amount": 130}],
+      "allergens": [],
+      "cautions": ["국화과 식물에 알레르기가 있는 경우 섭취에 주의하세요."]
+    },
+    {
+      "id": "wl_vitc", "name": "WL 비타민C 1000", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 250, "timing": "any",
+      "ingredients": [{"id": "vitamin_c", "amount": 1000}],
+      "allergens": [],
+      "cautions": []
+    },
+    {
+      "id": "wl_zinc_selenium", "name": "WL 아연·셀레늄", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 300, "timing": "any",
+      "ingredients": [{"id": "zinc", "amount": 8.5}, {"id": "selenium", "amount": 55}],
+      "allergens": [],
+      "cautions": []
+    },
+    {
+      "id": "wl_iron_folate", "name": "WL 철분·엽산", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 300, "timing": "morning",
+      "ingredients": [{"id": "iron", "amount": 12}, {"id": "folate", "amount": 400}],
+      "allergens": [],
+      "cautions": ["칼슘제와는 시간 간격을 두고 섭취하세요."]
+    },
+    {
+      "id": "wl_bcomplex", "name": "WL 비타민B 컴플렉스", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 400, "timing": "morning",
+      "ingredients": [
+        {"id": "thiamin", "amount": 25}, {"id": "riboflavin", "amount": 20}, {"id": "niacin", "amount": 20},
+        {"id": "vitamin_b6", "amount": 20}, {"id": "folate", "amount": 200}, {"id": "vitamin_b12", "amount": 20},
+        {"id": "biotin", "amount": 50}, {"id": "pantothenic_acid", "amount": 20}
+      ],
+      "allergens": [],
+      "cautions": ["소변 색이 노랗게 변할 수 있습니다."]
+    },
+    {
+      "id": "wl_coq10", "name": "WL 코엔자임Q10", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "연질캡슐", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1캡슐", "price_per_day": 700, "timing": "any",
+      "ingredients": [{"id": "coq10", "amount": 100}],
+      "allergens": [],
+      "cautions": ["임산부·수유부·어린이는 섭취를 피하세요."]
+    },
+    {
+      "id": "wl_ginkgo", "name": "WL 은행잎추출물", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 500, "timing": "any",
+      "ingredients": [{"id": "ginkgo", "amount": 120}],
+      "allergens": [],
+      "cautions": ["의약품(항응고제·항혈소판제) 복용 시 섭취에 주의하세요.", "수술 전후에는 섭취에 주의하세요."]
+    },
+    {
+      "id": "wl_redyeast", "name": "WL 홍국", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 600, "timing": "evening",
+      "ingredients": [{"id": "red_yeast_rice", "amount": 8}],
+      "allergens": [],
+      "cautions": ["임산부·수유부·어린이는 섭취를 피하세요.", "고지혈증 치료제 등 의약품 복용 시 섭취에 주의하세요.", "근육통이 나타나면 섭취를 중단하세요."]
+    },
+    {
+      "id": "wl_theanine", "name": "WL L-테아닌", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 500, "timing": "evening",
+      "ingredients": [{"id": "theanine", "amount": 200}],
+      "allergens": [],
+      "cautions": []
+    },
+    {
+      "id": "wl_glucosamine", "name": "WL 글루코사민", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 2회, 1회 1정",
+      "amount_basis": "per_serving", "servings_per_day": 2, "price_per_day": 500, "timing": "any",
+      "ingredients": [{"id": "glucosamine", "amount": 750, "unit": "mg"}],
+      "allergens": ["crustacean"],
+      "cautions": ["게·새우 등 갑각류에 알레르기가 있는 경우 섭취에 주의하세요.", "혈액항응고제(와파린) 복용 시 섭취에 주의하세요."]
+    },
+    {
+      "id": "wl_msm", "name": "WL MSM", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 2정", "price_per_day": 500, "timing": "any",
+      "ingredients": [{"id": "msm", "amount": 1500}],
+      "allergens": [],
+      "cautions": []
+    },
+    {
+      "id": "wl_garcinia", "name": "WL 가르시니아", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 2정", "price_per_day": 600, "timing": "morning",
+      "ingredients": [{"id": "garcinia", "amount": 900}],
+      "allergens": [],
+      "cautions": ["임산부·수유부·어린이는 섭취를 피하세요.", "간·신장·심장질환, 알레르기 및 천식이 있는 경우 전문가와 상담하세요."]
+    },
+    {
+      "id": "wl_banaba", "name": "WL 바나바잎", "brand": "WelLink 샘플", "sold_on_platform": true,
+      "form": "정제", "package": "1일분 개별 포장", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 600, "timing": "morning",
+      "ingredients": [{"id": "banaba", "amount": 1.3}],
+      "allergens": [],
+      "cautions": ["당뇨치료제 등 의약품 복용 시 섭취에 주의하세요."]
+    },
+
+    {
+      "id": "ext_multi", "name": "시판 고함량 종합비타민 (예시)", "brand": "타사 제품 예시", "sold_on_platform": false,
+      "form": "정제", "package": "병", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 0, "timing": "morning",
+      "ingredients": [
+        {"id": "vitamin_a", "amount": 700}, {"id": "beta_carotene", "amount": 3}, {"id": "vitamin_d", "amount": 25},
+        {"id": "vitamin_e", "amount": 30}, {"id": "vitamin_k", "amount": 70}, {"id": "vitamin_c", "amount": 500},
+        {"id": "thiamin", "amount": 10}, {"id": "riboflavin", "amount": 10}, {"id": "niacin", "amount": 15},
+        {"id": "vitamin_b6", "amount": 10}, {"id": "folate", "amount": 400}, {"id": "vitamin_b12", "amount": 10},
+        {"id": "biotin", "amount": 100}, {"id": "pantothenic_acid", "amount": 10}, {"id": "calcium", "amount": 150},
+        {"id": "magnesium", "amount": 100}, {"id": "zinc", "amount": 12}, {"id": "selenium", "amount": 70},
+        {"id": "iron", "amount": 10}
+      ],
+      "allergens": [],
+      "cautions": ["흡연자는 섭취에 주의하세요."]
+    },
+    {
+      "id": "ext_vitd5000", "name": "시판 고함량 비타민D 5000IU (예시)", "brand": "타사 제품 예시", "sold_on_platform": false,
+      "form": "연질캡슐", "package": "병", "daily_dose_text": "1일 1회, 1회 1캡슐", "price_per_day": 0, "timing": "any",
+      "ingredients": [{"id": "vitamin_d", "amount": 5000, "unit": "IU"}],
+      "allergens": [],
+      "cautions": []
+    },
+    {
+      "id": "ext_calmagd", "name": "시판 칼슘·마그네슘·비타민D (예시)", "brand": "타사 제품 예시", "sold_on_platform": false,
+      "form": "정제", "package": "병", "daily_dose_text": "1일 2회, 1회 1정",
+      "amount_basis": "per_serving", "servings_per_day": 2, "price_per_day": 0, "timing": "evening",
+      "ingredients": [{"id": "calcium", "amount": 300, "unit": "mg"}, {"id": "magnesium", "amount": 150, "unit": "mg"}, {"id": "vitamin_d", "amount": 500, "unit": "IU"}],
+      "allergens": [],
+      "cautions": []
+    },
+    {
+      "id": "ext_bhigh", "name": "시판 고함량 비타민B (예시)", "brand": "타사 제품 예시", "sold_on_platform": false,
+      "form": "정제", "package": "병", "daily_dose_text": "1일 1회, 1회 1정", "price_per_day": 0, "timing": "morning",
+      "ingredients": [
+        {"id": "thiamin", "amount": 100}, {"id": "riboflavin", "amount": 50}, {"id": "niacin", "amount": 50},
+        {"id": "vitamin_b6", "amount": 50}, {"id": "folate", "amount": 400}, {"id": "vitamin_b12", "amount": 500},
+        {"id": "biotin", "amount": 300}, {"id": "pantothenic_acid", "amount": 50}
+      ],
+      "allergens": [],
+      "cautions": []
+    },
+    {
+      "id": "ext_omega3", "name": "시판 오메가3 (예시)", "brand": "타사 제품 예시", "sold_on_platform": false,
+      "form": "연질캡슐", "package": "병", "daily_dose_text": "1일 2회, 1회 1캡슐",
+      "amount_basis": "per_serving", "servings_per_day": 2, "price_per_day": 0, "timing": "any",
+      "ingredients": [{"id": "epa_dha", "amount": 0.45, "unit": "g"}, {"id": "vitamin_e", "amount": 7.5, "unit": "IU"}],
+      "allergens": ["fish"],
+      "cautions": ["의약품(항응고제·항혈소판제) 복용 시 섭취에 주의하세요."]
+    },
+    {
+      "id": "ext_probiotics", "name": "시판 유산균 (예시)", "brand": "타사 제품 예시", "sold_on_platform": false,
+      "form": "캡슐", "package": "병", "daily_dose_text": "1일 1회, 1회 1캡슐", "price_per_day": 0, "timing": "morning",
+      "ingredients": [{"id": "probiotics", "amount": 10000000000, "unit": "CFU"}],
+      "allergens": [],
+      "cautions": []
+    }
+  ]
+}

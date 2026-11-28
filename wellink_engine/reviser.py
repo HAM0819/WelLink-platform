@@ -110,7 +110,7 @@ class Reviser:
                 s += GOAL_GAP_WEIGHT
             elif f.type == FindingType.DUPLICATE:
                 s += DUPLICATE_WEIGHT
-            elif f.type in (FindingType.UNKNOWN_DRUG, FindingType.UNKNOWN_INGREDIENT):
+            elif f.type in (FindingType.UNKNOWN_DRUG, FindingType.UNKNOWN_INGREDIENT, FindingType.ESTIMATED_DATA):
                 continue  # 수정으로 해결할 수 없는 항목
             else:
                 s += SEVERITY_WEIGHT[f.severity]
@@ -326,6 +326,8 @@ class Reviser:
                 description=finding.guidance or "섭취 시간을 나눠 드세요.",
                 resolves=[],
             )]
+        if finding.type == FindingType.ESTIMATED_DATA:
+            return []
         if finding.type in (FindingType.UNKNOWN_DRUG, FindingType.UNKNOWN_INGREDIENT):
             return [Suggestion(
                 id=f"consult:{finding.id}",

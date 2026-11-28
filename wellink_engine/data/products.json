@@ -4,6 +4,7 @@
   "notes": "모든 제품은 개발·시연용 가상 제품입니다. 실제 취급 제품의 표시사항으로 교체하세요. sold_on_platform=false인 제품은 사용자가 '현재 먹고 있는 제품'으로 등록하는 타사 제품 예시입니다. 함량은 표시사항 그대로 넣습니다: amount_basis(per_day=1일 섭취량당, per_serving=1회 섭취량당, 기본 per_day), servings_per_day(표시된 1일 섭취 횟수, 기본 1), 성분별 unit(IU·mg·μg·g·CFU 등, 생략하면 ingredients.json의 기준 단위). 엔진이 1일 기준·성분 기준 단위로 환산합니다. timing: morning/evening/any.",
   "allergens": {
     "crustacean": {"name": "갑각류(게·새우)", "aliases": ["갑각류", "게", "새우", "crustacean", "shellfish", "크릴"]},
+    "wheat": {"name": "밀", "aliases": ["밀", "밀가루", "wheat", "글루텐"]},
     "milk": {"name": "우유", "aliases": ["우유", "유제품", "milk", "dairy", "유당"]},
     "soy": {"name": "대두", "aliases": ["대두", "콩", "soy", "soybean"]},
     "fish": {"name": "어류", "aliases": ["어류", "생선", "fish", "고등어", "멸치"]}

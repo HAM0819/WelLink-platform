@@ -96,6 +96,13 @@
       "basis": "퀴놀론계 허가사항: 다가 양이온 함유 제제와 병용 시 흡수 저하"
     },
     {
+      "id": "fexofenadine_magnesium", "drug_classes": ["antihistamine_fexofenadine"], "ingredients": ["magnesium"],
+      "severity": "caution", "kind": "timing", "separation_hours": 2,
+      "effect": "마그네슘(·알루미늄)이 든 제산제와 함께 먹으면 펙소페나딘의 흡수가 줄어든다고 알려져 있어요. 마그네슘 보충제도 같은 이유로 시간 간격을 두는 것이 안전해요.",
+      "guidance": "알레그라(펙소페나딘)와 마그네슘이 든 제품은 2시간 이상 간격을 두고 드세요. 알레그라는 자몽·오렌지·사과 주스 대신 물과 함께 드세요.",
+      "basis": "펙소페나딘 허가사항: 알루미늄·마그네슘 함유 제산제와 병용 시 흡수 감소(복용 간격 권고), 과일 주스와 병용 시 흡수 감소"
+    },
+    {
       "id": "antibiotic_probiotics", "drug_classes": ["antibiotic_general", "tetracycline", "quinolone"], "ingredients": ["probiotics"],
       "severity": "info", "kind": "timing", "separation_hours": 2,
       "effect": "항생제가 유산균을 함께 줄일 수 있어요.",

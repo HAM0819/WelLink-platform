@@ -350,3 +350,26 @@ def test_family_history_adds_priority_check():
     coverage_ids = [p.product_id for p in r.recommended]
     # 가족력은 사용자 목적보다 낮은 가중치로 반영되지만, 뼈 건강 제품을 함께 고려
     assert "wl_calmagd" in coverage_ids or any(f.type == FindingType.NUTRIENT_LOW for f in r.report.findings)
+
+
+def test_pilot_persona_a_user_picked_products():
+    """사용자 A: 실증 후보 3종을 직접 고른 경우. 알레그라 인식, 마그네슘 간격, 아연 중복, 가정값 안내."""
+    r = check(ids("pl_denps_probiotics", "pl_ckd_calmag_dzinc", "pl_dw_enerthistle_choledown_plus"),
+              goals=["basic_health", "liver"], family_history=["hypertension"], medications=["알레그라"])
+    assert r.report.recognized_drugs[0]["name"] == "펙소페나딘"
+    types = {f.type for f in r.report.findings}
+    assert FindingType.DRUG_TIMING in types and FindingType.ESTIMATED_DATA in types
+    assert FindingType.DRUG_INTERACTION not in types
+    assert all(g.covered for g in r.report.goal_coverage)
+    basic = next(g for g in r.report.goal_coverage if g.goal_id == "basic_health")
+    assert basic.note and "여러 제품을 합쳐서" in basic.note
+    # 고른 조합으로 목적이 채워졌으면 보완 추천은 없음 (점검과 같은 기준)
+    rec = recommend(goals=["basic_health", "liver"], medications=["알레그라"],
+                    current=ids("pl_denps_probiotics", "pl_ckd_calmag_dzinc", "pl_dw_enerthistle_choledown_plus"))
+    assert rec.recommended == []
+
+
+def test_shared_facility_allergen_is_caution_not_avoid():
+    r = check(ids("pl_denps_probiotics"), goals=["gut"], allergies=["우유"])
+    f = findings_of(r.report, FindingType.ALLERGY)
+    assert f and f[0].severity == Severity.CAUTION and "제조시설" in f[0].message

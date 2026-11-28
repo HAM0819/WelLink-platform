@@ -79,6 +79,7 @@ def list_products(
             "package": p.package,
             "daily_dose_text": p.daily_dose_text,
             "price_per_day": p.price_per_day,
+            "data_status": p.data_status,
             "functions": cat.product_functions(p),
             "ingredients": [
                 {"id": i.id, "name": cat.ingredients[i.id].name, "amount": i.amount,

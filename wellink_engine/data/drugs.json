@@ -82,6 +82,16 @@
        {"name": "인다파미드", "aliases": ["인다파미드", "indapamide"]},
        {"name": "클로르탈리돈", "aliases": ["클로르탈리돈", "chlorthalidone"]}
      ]},
+    {"id": "antihistamine_fexofenadine", "name": "항히스타민제(펙소페나딘)",
+     "members": [{"name": "펙소페나딘", "aliases": ["펙소페나딘", "fexofenadine", "알레그라", "allegra", "알레그라디"]}]},
+    {"id": "antihistamine", "name": "항히스타민제",
+     "members": [
+       {"name": "세티리진", "aliases": ["세티리진", "cetirizine", "지르텍", "zyrtec"]},
+       {"name": "레보세티리진", "aliases": ["레보세티리진", "levocetirizine", "씨잘", "xyzal"]},
+       {"name": "로라타딘", "aliases": ["로라타딘", "loratadine", "클라리틴", "claritin"]},
+       {"name": "데스로라타딘", "aliases": ["데스로라타딘", "desloratadine", "에리우스"]},
+       {"name": "빌라스틴", "aliases": ["빌라스틴", "bilastine", "빌락스텐"]}
+     ]},
     {"id": "immunosuppressant", "name": "면역억제제",
      "members": [
        {"name": "사이클로스포린", "aliases": ["사이클로스포린", "시클로스포린", "cyclosporine", "ciclosporin"]},

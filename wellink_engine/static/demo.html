@@ -98,11 +98,29 @@ details ul { margin: 4px 0; padding-left: 16px; }
 .hidden { display: none; }
 .err { color: var(--avoid); font-size: 13px; margin-top: 8px; }
 ul.plain { margin: 0; padding-left: 16px; font-size: 13px; color: var(--muted); }
+.b-pick { background: var(--info-soft); color: var(--info); }
+.b-data { background: var(--warning-soft); color: var(--warning); }
+.b-sample { background: var(--bar); color: var(--muted); }
+button.secondary { width: 100%; padding: 12px; border: 1px solid var(--brand); border-radius: 12px; background: var(--card);
+  color: var(--brand); font: inherit; font-weight: 700; cursor: pointer; margin-top: 8px; }
+.goal { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-top: 1px solid var(--line); }
+.goal:first-child { border-top: 0; padding-top: 0; }
+.goal .mark-ok { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; }
+.goal .yes { background: var(--ok-soft); color: var(--ok); } .goal .no { background: var(--caution-soft); color: var(--caution); }
+.ai-block { padding: 8px 0; border-top: 1px dashed var(--line); }
+.ai-block:first-child { border-top: 0; padding-top: 0; }
+.ai-block h3 { font-size: 14px; margin: 0 0 6px; }
+.data-note { font-size: 12px; color: var(--warning); margin-top: 4px; }
+.funcs { margin: 6px 0 0; padding-left: 16px; font-size: 12px; color: var(--muted); }
 </style>
 </head>
 <body>
 <div class="app">
   <header><h1>WelLink</h1><span>맞춤 조합 추천 · 성분 점검 (데모)</span></header>
+  <select id="persona" style="margin-bottom:12px">
+    <option value="">예시 사용자 불러오기</option>
+    <option value="A">사용자 A — 34세 남성 직장인 · 고혈압 가족력 · 알레그라 복용</option>
+  </select>
 
   <section class="card" id="profile-card">
     <h2>① 건강 프로필 <small>계산에만 쓰고 저장하지 않아요</small></h2>
@@ -129,7 +147,14 @@ ul.plain { margin: 0; padding-left: 16px; font-size: 13px; color: var(--muted); 
   </section>
 
   <section class="card">
-    <h2>② 지금 먹고 있는 제품 <small>타사 제품 포함</small></h2>
+    <h2>② 제품 담기</h2>
+    <label class="field">플랫폼에서 직접 고른 제품</label>
+    <div id="picked-list" class="muted">없음</div>
+    <div class="row" style="margin-top:8px">
+      <select id="pick-select"></select>
+      <button class="small" id="pick-add" style="flex:none">담기</button>
+    </div>
+    <label class="field">지금 먹고 있는 제품 <span class="muted">(타사 제품 포함)</span></label>
     <div id="current-list" class="muted">없음</div>
     <div class="row" style="margin-top:8px">
       <select id="current-select"></select>
@@ -144,15 +169,18 @@ ul.plain { margin: 0; padding-left: 16px; font-size: 13px; color: var(--muted); 
       <textarea id="custom-ings" placeholder="표시사항 그대로, 한 줄에 하나씩: 성분명 양 단위&#10;비타민D 2500 IU&#10;아연 15 mg" style="margin-top:6px"></textarea>
       <button class="small" id="custom-add" style="margin-top:6px">직접 입력 제품 추가</button>
     </details>
-    <button class="primary" id="run" style="margin-top:12px">AI 추천 받고 성분 점검하기</button>
+    <button class="primary" id="run-check" style="margin-top:12px">고른 제품 성분 점검하기</button>
+    <button class="secondary" id="run">AI 추천 받고 성분 점검하기</button>
     <div class="err hidden" id="err"></div>
   </section>
 
   <div id="results" class="hidden">
     <div class="summary" id="summary"></div>
+    <section class="card"><h2>목적별 충족 <small>인정된 기능성 기준</small></h2><div id="goals-cov"></div></section>
     <section class="card"><h2>③ 내 조합 <small id="price"></small></h2><div id="combo"></div>
       <div class="row" style="margin-top:10px"><select id="add-select"></select><button class="small brand" id="add-btn" style="flex:none">추가 후 재점검</button></div>
     </section>
+    <section class="card hidden" id="ai-card"><h2>AI 제안 <small>참고해서 직접 고르세요</small></h2><div id="ai"></div></section>
     <section class="card" id="revision-card"><h2>자동 수정안 <small>위험도가 높은 항목부터</small></h2><div id="revision"></div></section>
     <section class="card"><h2>④ 점검 결과 <small>근거와 함께</small></h2><div id="findings"></div></section>
     <section class="card"><h2>성분 분포 <small>막대 끝 = 상한(최대) 기준, 세로선 = 권장(최소) 기준</small></h2><div id="dist"></div></section>
@@ -163,7 +191,7 @@ ul.plain { margin: 0; padding-left: 16px; font-size: 13px; color: var(--muted); 
 
 <script>
 const API = "";
-const state = { sex: "male", goals: ["cardio", "fatigue"], family: ["dyslipidemia"], current: [], items: [],
+const state = { sex: "male", goals: ["cardio", "fatigue"], family: ["dyslipidemia"], current: [], picked: [], items: [],
   recommended: {}, excluded: [], notes: [], report: null, revision: null, products: [] };
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -211,6 +239,12 @@ function renderCurrent() {
   $("current-list").querySelectorAll("[data-rm]").forEach((b) => b.onclick = () => { state.current.splice(+b.dataset.rm, 1); renderCurrent(); });
 }
 
+function renderPicked() {
+  $("picked-list").innerHTML = state.picked.length ? state.picked.map((it, i) =>
+    `<div class="row" style="margin:4px 0"><span>${esc(productName(it))}</span><button class="small" style="flex:none" data-unpick="${i}">삭제</button></div>`).join("") : "없음";
+  $("picked-list").querySelectorAll("[data-unpick]").forEach((b) => b.onclick = () => { state.picked.splice(+b.dataset.unpick, 1); renderPicked(); });
+}
+
 function parseCustom() {
   const rows = $("custom-ings").value.split("\n").map((l) => l.trim()).filter(Boolean);
   const ingredients = [];
@@ -224,8 +258,51 @@ function parseCustom() {
   return ingredients;
 }
 
+async function runCheck() {
+  $("err").classList.add("hidden");
+  try {
+    if (!state.picked.length && !state.current.length) throw new Error("점검할 제품을 담아 주세요.");
+    state.items = [...state.picked, ...state.current];
+    state.recommended = {}; state.excluded = [];
+    const [chk, extra, fresh] = await Promise.all([
+      api("/v1/checks", { profile: profile(), items: state.items }),
+      api("/v1/recommendations", { profile: profile(), current_products: state.items, max_products: 2 }),
+      api("/v1/recommendations", { profile: profile(), current_products: state.current }),
+    ]);
+    state.notes = extra.profile_notes.filter((n) => !n.startsWith("지금 조합으로"));
+    state.ai = { extra, fresh };
+    show(chk.report, chk.revision);
+  } catch (e) { $("err").textContent = e.message; $("err").classList.remove("hidden"); }
+}
+
+function renderAI() {
+  const ai = state.ai;
+  if (!ai) { $("ai-card").classList.add("hidden"); return; }
+  $("ai-card").classList.remove("hidden");
+  const extra = ai.extra.recommended;
+  const recList = (list) => `<ul class="reasons">${list.map((p) => `<li><b>${esc(p.name)}</b>${p.price_per_day ? ` (하루 ${won(p.price_per_day)})` : ""} — ${esc(p.reasons.map((r) => r.text).join(" / "))}</li>`).join("")}</ul>`;
+  const pickedNames = state.picked.map(productName);
+  const freshNames = ai.fresh.recommended.map((p) => p.name);
+  const same = freshNames.filter((n) => pickedNames.includes(n));
+  $("ai").innerHTML = `
+    <div class="ai-block"><h3>고른 조합에 더할 제품</h3>
+      ${extra.length ? recList(extra) + `<div class="actions">${extra.map((p, i) => `<button class="small brand" data-add-ai="${i}">${esc(p.name)} 추가</button>`).join("")}</div>`
+        : `<p class="muted" style="margin:0">고르신 제품으로 선택한 목적이 이미 채워져 있어 더할 제품이 없어요.</p>`}</div>
+    <div class="ai-block"><h3>AI가 처음부터 골랐다면</h3>
+      ${recList(ai.fresh.recommended)}
+      <p class="muted" style="margin:4px 0">${ai.fresh.recommended.length}개 제품${same.length ? ` · 고르신 제품과 겹침: ${same.map(esc).join(", ")}` : ""}${ai.fresh.excluded.length ? ` · 제외 ${ai.fresh.excluded.length}개(복용 약 등)` : ""}</p>
+      <button class="small brand" id="use-fresh">이 구성으로 바꿔 점검하기</button></div>`;
+  $("ai").querySelectorAll("[data-add-ai]").forEach((b) => b.onclick = () => { state.items.push({ product_id: extra[+b.dataset.addAi].product_id }); recheck(); });
+  $("use-fresh").onclick = () => {
+    state.items = ai.fresh.combination;
+    state.recommended = Object.fromEntries(ai.fresh.recommended.map((r) => [r.product_id, r]));
+    state.excluded = ai.fresh.excluded; state.ai = null; recheck();
+  };
+}
+
 async function runRecommend() {
   $("err").classList.add("hidden");
+  state.ai = null;
   try {
     const data = await api("/v1/recommendations", { profile: profile(), current_products: state.current });
     state.items = data.combination;
@@ -262,7 +339,14 @@ function show(report, revision) {
   $("summary").className = `summary s-${sum.overall}`;
   $("summary").innerHTML = `<b>${esc(sum.overall_label)}</b><div class="counts">${Object.entries(cats).map(([k, v]) =>
     `<span class="count">${v} <b>${sum.counts_by_category[k] || 0}</b></span>`).join("")}</div>`;
-  $("price").textContent = `하루 ${won(sum.total_price_per_day)} (플랫폼 제품 기준)`;
+  $("price").textContent = sum.total_price_per_day ? `하루 ${won(sum.total_price_per_day)} (플랫폼 제품 기준)` : "가격 미정";
+
+  // 목적별 충족
+  $("goals-cov").innerHTML = report.goal_coverage.map((g) => `<div class="goal">
+      <span class="mark-ok ${g.covered ? "yes" : "no"}">${g.covered ? "✓" : "!"}</span>
+      <div><b>${esc(g.name)}</b> <span class="muted">${g.covered ? "충족" : "보완 필요"} · 충족도 ${Math.round(g.coverage * 100)}%</span>
+        <div class="muted">${g.by_items.length ? esc(g.by_items.join(", ")) : "해당 제품 없음"}</div>
+        ${g.note ? `<div class="muted">${esc(g.note)}</div>` : ""}</div></div>`).join("");
 
   // 조합
   $("combo").innerHTML = report.items.map((it, i) => {
@@ -270,11 +354,15 @@ function show(report, revision) {
     const isRec = rec && it.source === "platform";
     const alts = isRec ? rec.alternatives : [];
     return `<div class="item"><div class="item-head"><div>
-        ${isRec ? '<span class="badge b-rec">AI 추천</span>' : it.source === "external" ? '<span class="badge b-ext">현재 복용</span>' : '<span class="badge b-rec">선택</span>'}
+        ${isRec ? '<span class="badge b-rec">AI 추천</span>' : state.picked.some((x) => x.product_id === it.product_id) ? '<span class="badge b-pick">직접 선택</span>'
+          : it.source === "external" ? '<span class="badge b-ext">현재 복용</span>' : '<span class="badge b-rec">추가</span>'}
         ${it.locked ? '<span class="badge b-lock">고정</span>' : ""}
+        ${it.data_status === "partial" ? '<span class="badge b-data">표시값 확인 필요</span>' : it.data_status === "sample" ? '<span class="badge b-sample">가상 제품</span>' : ""}
         <span class="item-name">${esc(it.name)}</span>
         <div class="muted">${esc(it.daily_dose_text || "")}${it.price_per_day ? " · 하루 " + won(it.price_per_day) : ""}</div></div></div>
-      ${isRec ? `<ul class="reasons">${rec.reasons.map((r) => `<li>${esc(r.text)}</li>`).join("")}</ul>` : ""}
+      ${isRec ? `<ul class="reasons">${rec.reasons.map((r) => `<li>${esc(r.text)}</li>`).join("")}</ul>`
+        : it.functions.length ? `<ul class="funcs">${it.functions.slice(0, 4).map((f) => `<li>${esc(f)}</li>`).join("")}${it.functions.length > 4 ? `<li>외 ${it.functions.length - 4}개</li>` : ""}</ul>` : ""}
+      ${it.estimated_ingredients.length ? `<div class="data-note">가정값으로 계산: ${esc(it.estimated_ingredients.join(", "))}</div>` : ""}
       <div class="actions">
         <button class="small" data-lock="${i}">${it.locked ? "고정 해제" : "고정"}</button>
         <button class="small" data-del="${i}">빼기</button>
@@ -289,6 +377,8 @@ function show(report, revision) {
   $("combo").querySelectorAll("[data-del]").forEach((b) => b.onclick = () => { state.items.splice(+b.dataset.del, 1); recheck(); });
   $("combo").querySelectorAll("[data-lock]").forEach((b) => b.onclick = () => { const i = +b.dataset.lock; state.items[i] = { ...state.items[i], locked: !state.items[i].locked }; recheck(); });
   $("combo").querySelectorAll("[data-alt]").forEach((s) => s.onchange = () => { if (s.value) { state.items[+s.dataset.alt] = { product_id: s.value }; recheck(); } });
+
+  renderAI();
 
   // 자동 수정안
   if (revision && (revision.steps.length || revision.note)) {
@@ -359,11 +449,30 @@ async function init() {
   $("sex").querySelectorAll(".chip").forEach((b) => b.onclick = () => {
     state.sex = b.dataset.v; $("sex").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", x === b)); });
   const opt = (p) => `<option value="${esc(p.id)}">${esc(p.name)}</option>`;
+  const optgroupPilot = products.filter((p) => p.sold_on_platform && p.data_status !== "sample");
   $("current-select").innerHTML = `<optgroup label="타사 제품 예시">${products.filter((p) => !p.sold_on_platform).map(opt).join("")}</optgroup>`
     + `<optgroup label="WelLink 제품">${products.filter((p) => p.sold_on_platform).map(opt).join("")}</optgroup>`;
   $("add-select").innerHTML = products.filter((p) => p.sold_on_platform).map(opt).join("");
+  $("pick-select").innerHTML = `<optgroup label="실증 후보 제품">${optgroupPilot.map(opt).join("")}</optgroup>`
+    + `<optgroup label="가상 샘플 제품">${products.filter((p) => p.sold_on_platform && p.data_status === "sample").map(opt).join("")}</optgroup>`;
   state.current = [{ product_id: "ext_multi" }, { product_id: "ext_calmagd" }];
-  renderCurrent();
+  renderCurrent(); renderPicked();
+  $("pick-add").onclick = () => { state.picked.push({ product_id: $("pick-select").value }); renderPicked(); };
+  $("run-check").onclick = runCheck;
+  const loadPersona = (id) => {
+    if (id !== "A") return;
+    $("age").value = 34; state.sex = "male";
+    $("sex").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", x.dataset.v === "male"));
+    state.goals.splice(0, state.goals.length, "basic_health", "liver");
+    state.family.splice(0, state.family.length, "hypertension");
+    $("meds").value = "알레그라"; $("allergies").value = ""; $("smoker").checked = false; $("preg").checked = false;
+    state.picked = [{ product_id: "pl_denps_probiotics" }, { product_id: "pl_ckd_calmag_dzinc" }, { product_id: "pl_dw_enerthistle_choledown_plus" }];
+    state.current = [];
+    draw(); renderPicked(); renderCurrent();
+  };
+  $("persona").onchange = () => loadPersona($("persona").value);
+  const qp = new URLSearchParams(location.search).get("persona");
+  if (qp) { $("persona").value = qp; loadPersona(qp); runCheck(); }
   $("current-add").onclick = () => { state.current.push({ product_id: $("current-select").value }); renderCurrent(); };
   $("custom-add").onclick = () => {
     try {

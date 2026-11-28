@@ -75,6 +75,7 @@ class ProductIngredient(BaseModel):
     id: str
     amount: float
     unit: Optional[str] = Field(None, description="표시 단위 (생략하면 성분 기준 단위). 예: IU, mg, μg, g, 억CFU")
+    estimated: bool = Field(False, description="표시사항으로 확인하지 못한 가정값")
 
 
 class Product(BaseModel):
@@ -94,6 +95,10 @@ class Product(BaseModel):
     daily_dose_text: Optional[str] = None
     amount_basis: Literal["per_day", "per_serving"] = "per_day"
     servings_per_day: float = Field(1.0, gt=0)
+    data_status: Literal["sample", "verified", "partial"] = "sample"
+    data_note: Optional[str] = None
+    data_sources: list[str] = Field(default_factory=list)
+    facility_allergens: list[str] = Field(default_factory=list, description="같은 제조시설에서 쓰는 알레르기 원료")
     price_per_day: int = 0
     timing: Literal["morning", "evening", "any"] = "any"
     ingredients: list[ProductIngredient]
@@ -353,7 +358,7 @@ class Catalog:
             if all(pi.id in self.ingredients for pi in p.ingredients):
                 for err in self.normalize_dose(p).errors:
                     errors.append(f"products.json {p.id}: {err}")
-            for a in p.allergens:
+            for a in [*p.allergens, *p.facility_allergens]:
                 if a not in self.allergens:
                     errors.append(f"products.json {p.id}: 알 수 없는 알레르기 ID '{a}'")
         for g in self.goals.values():
@@ -519,6 +524,8 @@ class Catalog:
                 text = f"1일 {label} = {canon}"
             else:
                 text = f"1일 {canon}"
+            if pi.estimated:
+                text += " (가정값)"
             per_day[pi.id] = per_day.get(pi.id, 0.0) + value
             lines.setdefault(pi.id, []).append(DoseLine(pi.id, value, text))
         result = NormalizedDose(per_day, lines, errors)

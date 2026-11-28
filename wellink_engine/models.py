@@ -49,6 +49,7 @@ class FindingType(str, Enum):
     ALLERGY = "allergy"                        # 알레르기 성분 포함
     UNKNOWN_DRUG = "unknown_drug"              # 인식하지 못한 약
     UNKNOWN_INGREDIENT = "unknown_ingredient"  # 인식하지 못한 성분
+    ESTIMATED_DATA = "estimated_data"          # 제품 함량 중 가정값이 있음 (표시사항 확인 전)
 
 
 # 앱 화면에서 탭/칩으로 묶어 보여 주기 위한 분류 (설문 '확인하고 싶은 정보' 기준)
@@ -67,6 +68,7 @@ FINDING_CATEGORY = {
     FindingType.ALLERGY: "caution",
     FindingType.UNKNOWN_DRUG: "check_needed",
     FindingType.UNKNOWN_INGREDIENT: "check_needed",
+    FindingType.ESTIMATED_DATA: "check_needed",
 }
 CATEGORY_LABEL = {
     "excess": "과다",
@@ -233,6 +235,9 @@ class ItemView(BaseModel):
     price_per_day: int
     daily_dose_text: Optional[str] = None
     functions: list[str] = Field(default_factory=list, description="이 제품이 표시할 수 있는 기능성 문구")
+    data_status: str = Field("sample", description="제품 데이터 상태: sample(가상) / verified(표시사항 확인) / partial(일부 가정값·확인 필요)")
+    data_note: Optional[str] = None
+    estimated_ingredients: list[str] = Field(default_factory=list, description="함량이 가정값인 성분명")
     cautions: list[str] = Field(default_factory=list, description="제품 표시 주의사항")
 
 
@@ -242,6 +247,7 @@ class GoalCoverage(BaseModel):
     covered: bool
     coverage: float
     by_items: list[str]
+    note: Optional[str] = Field(None, description="여러 제품을 합쳐서 채운 경우 등 설명")
 
 
 class ScheduleSlot(BaseModel):

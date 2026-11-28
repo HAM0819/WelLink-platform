@@ -200,11 +200,13 @@ POST /v1/recommendations
 | `ingredients.json` | 성분 마스터: 별칭, 단위, 영양성분 기준치(nrv), 기능성 문구와 태그, 기능성 원료 일일섭취량 | 새 원료 추가, 기능성 문구 갱신 |
 | `nutrient_reference.json` | 한국인 영양소 섭취기준(권장·충분·상한섭취량, 연령·성별 구간) | 2025 개정 값 반영 |
 | `products.json` | 취급 제품(표시 함량·단위·1회/1일 기준·1일 섭취 횟수, 가격, 섭취 시간, 알레르기, 표시 주의사항)과 타사 제품 예시 | 실제 공급 제품으로 교체 |
-| `products.d/*.json` | 추가 제품 파일(자동으로 함께 읽음). `tools/import_products.py`로 CSV에서 생성 | 시판 제품 등록 |
+| `products.d/*.json` | 추가 제품 파일(자동으로 함께 읽음). `tools/import_products.py`로 CSV에서 생성. `pilot.json`은 초기 실증 후보 제품 | 시판 제품 등록 |
 | `goals.json` | 건강 관리 목적 → 기능성 태그 가중치 | 목적 추가, 가중치 조정 |
 | `drugs.json` | 약효군과 약 이름·제품명 별칭 | 약 추가 |
 | `interactions.json` | 약-성분, 성분-성분, 개인 상태-성분 규칙과 약물로 인한 영양소 고갈 | 자문 약사 검토 결과 반영 |
 | `profile_rules.json` | 가족력 → 관련 목적·우선 확인 영양소, 생애주기 규칙 | 항목 추가 |
+
+제품마다 `data_status`(sample=가상, partial=일부 확인 필요, verified=표시사항 확인)를 두고, 확인하지 못한 함량은 성분에 `"estimated": true`(가정값)로 표시합니다. 가정값이 계산에 들어가면 점검 결과에 '함량 일부 가정값' 항목이 함께 나옵니다. 같은 제조시설에서 쓰는 알레르기 원료는 `facility_allergens`로 넣으면 '혼입 가능성(주의)'으로 안내합니다.
 
 데이터를 바꾼 뒤에는 `.venv/bin/python -m pytest -q`로 회귀 테스트를 돌리세요.
 

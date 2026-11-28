@@ -35,7 +35,7 @@ def test_example_personas_all_pass(tmp_path):
     code = validate_personas.main([str(ROOT / "validation/personas.example.json"), "--out", str(out)])
     assert code == 0
     text = out.read_text(encoding="utf-8")
-    assert "기대 조건 21개 중 21개 일치" in text
+    assert "기대 조건 27개 중 27개 일치" in text
 
 
 def test_persona_mismatch_is_reported(tmp_path):

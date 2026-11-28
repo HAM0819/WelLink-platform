@@ -147,6 +147,7 @@ class Checker:
         findings += gap_findings
         findings += self._nutrient_low(totals, gap_goals)
         findings += self._unknowns(items)
+        findings += self._estimated(items)
 
         findings.sort(
             key=lambda f: (-SEVERITY_RANK[f.severity], _CATEGORY_ORDER.index(f.category), f.title)
@@ -190,6 +191,9 @@ class Checker:
             daily_dose_text=item.product.daily_dose_text,
             functions=self.catalog.product_functions(item.product),
             cautions=item.product.cautions,
+            data_status=item.product.data_status,
+            data_note=item.product.data_note,
+            estimated_ingredients=[self.catalog.ingredients[pi.id].name for pi in item.product.ingredients if pi.estimated],
         )
 
     def _allergy(self, items: list[ResolvedItem]) -> list[Finding]:
@@ -211,6 +215,44 @@ class Checker:
                         evidence=[Evidence(source=LABEL_SOURCE, detail=f"{item.product.name} 알레르기 유발 원료: {name}")],
                     )
                 )
+            for aid in item.product.facility_allergens:
+                if aid not in self.ctx.allergen_ids or aid in item.product.allergens:
+                    continue
+                name = self.catalog.allergens[aid].name
+                out.append(
+                    _make_finding(
+                        FindingType.ALLERGY,
+                        Severity.CAUTION,
+                        f"{item.product.name}: {name} 혼입 가능성",
+                        f"{item.product.name}은(는) {name}을(를) 사용하는 제품과 같은 제조시설에서 만들어져요. 원료에는 없지만 극미량 혼입될 수 있어요.",
+                        fid_extra=f"facility:{aid}@{item.product.id}",
+                        guidance="알레르기가 심하다면 섭취 전 의사·약사와 상담하세요.",
+                        item_keys=[item.key],
+                        evidence=[Evidence(source=LABEL_SOURCE, detail=f"{item.product.name}: {name} 사용 제품과 같은 제조시설")],
+                    )
+                )
+        return out
+
+    def _estimated(self, items: list[ResolvedItem]) -> list[Finding]:
+        """표시사항으로 확인하지 못한 가정값이 계산에 들어간 경우 알린다 (실증 데이터 검수용)."""
+        out = []
+        for item in items:
+            names = [self.catalog.ingredients[pi.id].name for pi in item.product.ingredients if pi.estimated]
+            if not names:
+                continue
+            out.append(
+                _make_finding(
+                    FindingType.ESTIMATED_DATA,
+                    Severity.INFO,
+                    f"{item.product.name}: 함량 일부 가정값",
+                    f"{', '.join(names)} 함량은 표시사항을 확인하기 전이라 가정값으로 계산했어요. 실제 함량에 따라 점검 결과가 달라질 수 있어요.",
+                    fid_extra=item.product.id,
+                    guidance="함량이 확인되면 점검 결과를 다시 계산해 드려요.",
+                    item_keys=[item.key],
+                    evidence=[Evidence(source="제품 데이터 검수 메모", detail=item.product.data_note)]
+                    if item.product.data_note else [],
+                )
+            )
         return out
 
     def _amount_checks(self, totals: Totals) -> tuple[list[Finding], list[Finding]]:
@@ -492,7 +534,18 @@ class Checker:
                 it.product.name for it in items if any(item_tags[it.key].get(t, None) and item_tags[it.key][t].strength >= 0.3 for t in core)
             ]
             covered = value >= GOAL_COVERED_STRENGTH
-            coverage.append(GoalCoverage(goal_id=goal.id, name=goal.name, covered=covered, coverage=round(value, 2), by_items=by_items))
+            note = None
+            if value > 0 and not by_items:
+                # 어느 한 제품이 아니라 조합 전체로 채운 기능성 (예: 여러 제품의 영양소를 합쳐 '종합 영양')
+                best_tag = max((t for t in core if t in combo_tags), key=lambda t: combo_tags[t].strength)
+                contributing = {n for n, _ in combo_tags[best_tag].claims}
+                by_items = [it.product.name for it in items
+                            if any(cat.ingredients[i].name in contributing or best_tag == "multinutrient"
+                                   and cat.claim_factor(cat.ingredients[i], v) > 0 and cat.ingredients[i].category == "nutrient"
+                                   for i, v in it.amounts.items())]
+                note = "여러 제품을 합쳐서 채웠어요: " + "; ".join(t for _, t in combo_tags[best_tag].claims[:1])
+            coverage.append(GoalCoverage(goal_id=goal.id, name=goal.name, covered=covered, coverage=round(value, 2),
+                                         by_items=by_items, note=note))
             if covered:
                 continue
             gap_goals.add(goal.id)

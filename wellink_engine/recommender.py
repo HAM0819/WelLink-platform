@@ -66,12 +66,16 @@ class Recommender:
         self.checker = checker
 
     # ------------------------------------------------------------------
-    def _coverage(self, items: list[ResolvedItem]) -> dict[str, float]:
-        covered: dict[str, float] = {}
+    def _combo_tags(self, items: list[ResolvedItem]) -> dict[str, TagInfo]:
+        """조합 전체 성분 합계 기준의 기능성 (점검의 목적 충족 판단과 같은 기준)."""
+        totals: dict[str, float] = {}
         for it in items:
-            for tag, info in self.catalog.tags_for_amounts(it.amounts).items():
-                covered[tag] = max(covered.get(tag, 0.0), info.strength)
-        return covered
+            for iid, v in it.amounts.items():
+                totals[iid] = totals.get(iid, 0.0) + v
+        return self.catalog.tags_for_amounts(totals)
+
+    def _coverage(self, items: list[ResolvedItem]) -> dict[str, float]:
+        return {t: info.strength for t, info in self._combo_tags(items).items()}
 
     def _effective_demand(self, covered: dict[str, float]) -> dict[str, float]:
         """목적별 필요도. 핵심 기능성이 이미 채워진 목적은 나머지 보조 기능성의 필요도를 낮춘다."""
@@ -139,10 +143,14 @@ class Recommender:
         for _ in range(slots):
             best: _Scored | None = None
             for p in pool:
-                tags = cat.tags_for_amounts(cat.product_amounts(p))
-                gain, inc = self._gain(tags, covered)
+                own_tags = cat.tags_for_amounts(cat.product_amounts(p))
+                probe = platform_item(cat, p.id)
+                combo_tags = self._combo_tags([*combo, probe])
+                gain, inc = self._gain(combo_tags, covered)
                 if gain < MIN_GAIN:
                     continue
+                # 추천 이유는 제품 자체의 기능성 문구로 설명하고, 조합으로만 생기는 기능성은 조합 문구로 설명
+                tags = {t: own_tags.get(t, combo_tags[t]) for t in combo_tags}
                 if budget_per_day is not None and spent + p.price_per_day > budget_per_day:
                     excluded.setdefault(p.id, f"하루 예산({budget_per_day:,}원)을 넘어요.")
                     continue
@@ -164,8 +172,7 @@ class Recommender:
             chosen.append(best)
             combo.append(best.item)
             spent += best.product.price_per_day
-            for tag, delta in best.increments.items():
-                covered[tag] = covered.get(tag, 0.0) + delta
+            covered = self._coverage(combo)
             base_ids = best.finding_ids
             pool = [p for p in pool if p.id != best.product.id]
             excluded.pop(best.product.id, None)
@@ -175,7 +182,7 @@ class Recommender:
 
         if not chosen:
             if current and all(g.covered for g in self.checker.evaluate(current)[1]):
-                notes.append("지금 드시는 제품으로 선택한 목적이 이미 채워져 있어 새로 추가할 제품이 없어요.")
+                notes.append("지금 조합으로 선택한 목적이 이미 채워져 있어 새로 추가할 제품이 없어요.")
             elif slots == 0:
                 notes.append("제품 수 한도에 도달해 새 제품을 추천하지 않았어요.")
             else:
@@ -212,18 +219,21 @@ class Recommender:
     def _describe(
         self, scored: _Scored, combo: list[ResolvedItem], chosen_ids: set[str], excluded: dict[str, str]
     ) -> RecommendedProduct:
-        reasons: list[Reason] = []
-        seen: set[str] = set()
-        # 기여도가 큰 태그부터 설명
+        # 기여도가 큰 태그부터, 목적별로 한 줄에 모아 설명 (목적당 기능성 문구 최대 3개)
         ordered = sorted(scored.increments.items(), key=lambda kv: -self.ctx.demand.get(kv[0], 0) * kv[1])
+        by_goal: dict[tuple, list[str]] = {}
         for tag, _delta in ordered:
             for goal_id, label in self._goal_label_for_tag(tag):
-                claims = list(dict.fromkeys(f"{n}: {t}" for n, t in scored.tags[tag].claims))
-                text = f"{label} — {' / '.join(claims[:2])}"
-                if text not in seen:
-                    seen.add(text)
-                    reasons.append(Reason(goal_id=goal_id, text=text))
+                claims = by_goal.setdefault((goal_id, label), [])
+                for n, t in scored.tags[tag].claims:
+                    line = f"{n}: {t}"
+                    if line not in claims:
+                        claims.append(line)
                 break
+        reasons = [
+            Reason(goal_id=goal_id, text=f"{label} — {' / '.join(claims[:3])}")
+            for (goal_id, label), claims in by_goal.items()
+        ]
         considerations = []
         for f in scored.new_findings:
             if f.severity in (Severity.CAUTION, Severity.INFO) and f.type != FindingType.DUPLICATE:
